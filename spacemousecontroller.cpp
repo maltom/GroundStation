@@ -11,7 +11,7 @@ spaceMouseController::spaceMouseController(QObject *parent) : QObject(parent)
 }
 spaceMouseController::~spaceMouseController()
 {
-dev=nullptr;
+    dev=nullptr;
 }
 
 void spaceMouseController::findDevice(void)
@@ -27,18 +27,17 @@ void spaceMouseController::findDevice(void)
             if (getName == "3Dconnexion SpaceMouse Pro")
             {
                 status = 1;
-                emit sendSpaceStatus(status);
+                //emit sendSpaceStatus(status);
                 return;
             }
         }
     }
-   // status = 0;
+    // status = 0;
     //emit sendSpaceStatus(status);
     return;
 }
 void spaceMouseController::receiveCoordinates(void)
 {
-
     int rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
     if (rc == 0)
     {
@@ -65,10 +64,39 @@ void spaceMouseController::receiveCoordinates(void)
                 yaw = ev.value;
                 break;
             }
+
+            status = 1;
+            emit sendSpaceStatus(status);
+            emit sendCoordinates(x, y, z, roll, pitch, yaw);
         }
-        status = 1;
-        emit sendSpaceStatus(status);
-        emit sendCoordinates(x, y, z, roll, pitch, yaw);
+        else if(ev.type == 1)
+        {
+            if(ev.value)
+            {
+                switch (ev.code)
+                {
+                case 257:
+                    emit sendCameraChange();
+                    break;
+                    /*case REL_X:
+                y = ev.value;
+                break;
+            case REL_Z:
+                z = ev.value;
+                break;
+            case REL_RY:
+                roll = -ev.value;
+                break;
+            case REL_RX:
+                pitch = ev.value;
+                break;
+            case REL_RZ:
+                yaw = ev.value;
+                break;*/
+                }
+            }
+        }
+
     }
 
 }

@@ -24,6 +24,7 @@ public:
 
     // important function to change Space Mouse steering scope from <-350, 350> linear to <-100, 100> nonlinear function
     void recalculateSpaceMousePosition(void);
+
     void calculateStep(std::vector<double> &vec, int steeringMode);
 
     // add to Position oveloads
@@ -35,6 +36,7 @@ public:
                                 double roll, double pitch, double yaw,
                                 double xVel, double yVel, double zVel,
                                 double rollVel, double pitchVel, double yawVel);
+    void getDifference(std::string time, positionData &A, std::string timeA, positionData &B, std::string timeB);
 private:
                             //  12345
     double preciseFactor    = 0.000005;

@@ -30,6 +30,7 @@ signals:
     void sendCoordinates(int x, int y, int z,
                          int roll, int pitch, int yaw);
     void sendSpaceStatus(int status);
+    void sendCameraChange(void);
 private slots:
     void receiveCoordinates(void);
 

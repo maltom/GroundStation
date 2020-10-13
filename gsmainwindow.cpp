@@ -4,8 +4,12 @@
 #include "videoprocess.h"
 #include "spacemousecontroller.h"
 #include "positiondata.h"
+#include "drawing.h"
 #include <QTimer>
 #include <chrono>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QImage>
 
 GSMainWindow::GSMainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,6 +25,14 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     spaceMouseStart();
 
     modeButtonsInitialization();
+
+    drawFirstGraphics();
+    drawingStart();
+
+    centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
+    setMouseTracking(true);
+
+
 }
 
 GSMainWindow::~GSMainWindow()
@@ -31,8 +43,16 @@ GSMainWindow::~GSMainWindow()
     spaceMouseThread->quit();
     while(!videoThread->isFinished());
 
+    drawingThread->quit();
+    while(!drawingThread->isFinished());
+
     delete videoThread;
+    delete spaceMouseThread;
+    delete drawingThread;
     delete ui;
+
+
+
 }
 
 void GSMainWindow::videoStart()
@@ -71,7 +91,7 @@ void GSMainWindow::spaceMouseStart()
     connect(spaceMouseTriggerTimer,SIGNAL(timeout()),spaceMouse,SLOT(receiveCoordinates()));
     connect(spaceMouse,SIGNAL(sendCoordinates(int, int, int, int, int, int)),this, SLOT(receiveCoordinates(int, int, int, int, int, int)));
     connect(spaceMouse,SIGNAL(sendSpaceStatus(int)),this,SLOT(receiveSpaceStatus(int)));
-
+    connect(spaceMouse,SIGNAL(sendCameraChange()),this,SLOT(changeCamera()));
     connect(spaceMouseThread,SIGNAL(finished()),spaceMouse,SLOT(deleteLater()));
     connect(spaceMouseThread,SIGNAL(finished()),spaceMouseTriggerTimer,SLOT(deleteLater()));
 
@@ -85,28 +105,60 @@ void GSMainWindow::modeButtonsInitialization(void)
 {
     connect(ui->toggleCameraButton,SIGNAL(released()),SLOT(changeCamera()));
     connect(ui->toggleSteeringModeButton,SIGNAL(released()),SLOT(changeSteeringMode()));
+
+
+    connect(ui->motorTestEnabled,SIGNAL(stateChanged(int)),this,SLOT(testModeEnable(int)));
+    connect(ui->motor1Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->motor2Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->motor3Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->motor4Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->motor5Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->servo1Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
+    connect(ui->servo2Slider,SIGNAL(valueChanged(int)),SLOT(updateMotorPWMValues()));
 }
+void GSMainWindow::drawingStart()
+{
+    drawingThread = new QThread();
+    drawing *orientationDrawing = new drawing();
+
+    connect(this,SIGNAL(sendDrawingPositions(double,double,double,double)),orientationDrawing,SLOT(receivePositionsToPicture(double,double,double,double)));
+    connect(orientationDrawing,SIGNAL(sendPictureToDraw(QImage)),this,SLOT(receiveOrientationDrawing(QImage)));
+
+    orientationDrawing->moveToThread(drawingThread);
+
+    drawingThread->start();
+}
+
 
 void GSMainWindow::receiveCameraFrame(QImage frame)
 {
     ui->label->setPixmap(QPixmap::fromImage(frame));
 
 }
-
+void GSMainWindow::receiveOrientationDrawing(QImage drawing)
+{
+    ui->orientationLabel->setPixmap(QPixmap::fromImage(drawing));
+}
 
 void GSMainWindow::receiveCoordinates(int x, int y, int z, int roll, int pitch, int yaw)
 {
-    spaceMousePositionData.setPositionAndVelocity("current", x, y, z, roll, pitch, yaw);
-    spaceMousePositionData.recalculateSpaceMousePosition();
-    printSpaceMouseCoordinates();
+    spaceMousePositionData.setPositionAndVelocity("current", x, y, z, roll, pitch, yaw);    // getting coordinates from space mouse and saving it in object
+    spaceMousePositionData.recalculateSpaceMousePosition();                                 // normalizing <-350,350> to <-100,100>
+    printSpaceMouseCoordinates();                                                           // printing
     setTargetPosition();
 }
 void GSMainWindow::setTargetPosition(void)
 {
-    std::vector<double> vec = spaceMousePositionData.getPositionAndVelocity("current","position");
+    std::vector<double> vec = spaceMousePositionData.getPositionAndVelocity("current","position");  // getting coordinate
     spaceMousePositionData.calculateStep(vec, steeringMode);
     rovPosition.addToPositionAndVelocity("future",vec);
     printSetTargetPosition();
+    calculateDeviation();
+}
+void GSMainWindow::calculateDeviation(void)
+{
+    deviationPositionData.getDifference("current",rovPosition,"future",rovPosition,"current");
+    printDeviation();
 }
 
 void GSMainWindow::printSpaceMouseCoordinates(void)
@@ -114,12 +166,12 @@ void GSMainWindow::printSpaceMouseCoordinates(void)
     std::vector<double> data = spaceMousePositionData.getPositionAndVelocity("current","position");
     if(!data.empty())
     {
-        ui->spaceMouseXValue->setText(QString::number((int)data[0]));
-        ui->spaceMouseYValue->setText(QString::number((int)data[1]));
-        ui->spaceMouseZValue->setText(QString::number((int)data[2]));
-        ui->spaceMouseRollValue->setText(QString::number((int)data[3]));
-        ui->spaceMousePitchValue->setText(QString::number((int)data[4]));
-        ui->spaceMouseYawValue->setText(QString::number((int)data[5]));
+        ui->spaceMouseXValue->setText(QString::number(static_cast<int>(data[0])));
+        ui->spaceMouseYValue->setText(QString::number(static_cast<int>(data[1])));
+        ui->spaceMouseZValue->setText(QString::number(static_cast<int>(data[2])));
+        ui->spaceMouseRollValue->setText(QString::number(static_cast<int>(data[3])));
+        ui->spaceMousePitchValue->setText(QString::number(static_cast<int>(data[4])));
+        ui->spaceMouseYawValue->setText(QString::number(static_cast<int>(data[5])));
     }
 }
 void GSMainWindow::printSetTargetPosition(void)
@@ -127,15 +179,28 @@ void GSMainWindow::printSetTargetPosition(void)
     std::vector<double> data = rovPosition.getPositionAndVelocity("future","position");
     if(!data.empty())
     {
-        ui->setXValue->setText(QString::number((int)(data[0]*100)));
-        ui->setYValue->setText(QString::number((int)(data[1]*100)));
-        ui->setZValue->setText(QString::number((int)(data[2]*100)));
-        ui->setRollValue->setText(QString::number((int)(data[3]*100)));
-        ui->setPitchValue->setText(QString::number((int)(data[4]*100)));
-        ui->setYawValue->setText(QString::number((int)(data[5]*100)));
+        ui->setXValue->setText(QString::number(static_cast<int>(data[0]*100)));
+        ui->setYValue->setText(QString::number(static_cast<int>(data[1]*100)));
+        ui->setZValue->setText(QString::number(static_cast<int>(data[2]*100)));
+        ui->setRollValue->setText(QString::number(static_cast<int>(data[3]*100)));
+        ui->setPitchValue->setText(QString::number(static_cast<int>(data[4]*100)));
+        ui->setYawValue->setText(QString::number(static_cast<int>(data[5]*100)));
     }
 }
-
+void GSMainWindow::printDeviation(void)
+{
+    std::vector<double> data = deviationPositionData.getPositionAndVelocity("current","position");
+    if(!data.empty())
+    {
+        ui->differenceXValue->setText(QString::number(static_cast<int>(data[0]*100)));
+        ui->differenceYValue->setText(QString::number(static_cast<int>(data[1]*100)));
+        ui->differenceZValue->setText(QString::number(static_cast<int>(data[2]*100)));
+        ui->differenceRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
+        ui->differencePitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
+        ui->differenceYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
+        emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
+    }
+}
 
 void GSMainWindow::receiveSpaceStatus(int status)
 {
@@ -168,10 +233,47 @@ void GSMainWindow::changeCamera(void)
 
 void GSMainWindow::changeSteeringMode(void)
 {
-    (steeringMode == 1) ? steeringMode = 0 : steeringMode = 1;
-if(steeringMode)
-    ui->XTextLabel->setText("PICZ");
-else
-    ui->XTextLabel->setText("CZIP");
+    if(steeringMode)
+    {
+        steeringMode = 0;
+        ui->precisionLabel->setText("Fast");
+    }
+    else
+    {
+        steeringMode = 1;
+        ui->precisionLabel->setText("Precise");
+    }
+}
+void GSMainWindow::testModeEnable(int enabled)
+{
+    ui->motor1Slider->setEnabled(enabled);
+    ui->motor2Slider->setEnabled(enabled);
+    ui->motor3Slider->setEnabled(enabled);
+    ui->motor4Slider->setEnabled(enabled);
+    ui->motor5Slider->setEnabled(enabled);
+    ui->servo1Slider->setEnabled(enabled);
+    ui->servo2Slider->setEnabled(enabled);
+    testMode=enabled;
+}
+void GSMainWindow::updateMotorPWMValues(void)
+{
+    ui->motor1Value->setText(QString::number(ui->motor1Slider->value()));
+    ui->motor2Value->setText(QString::number(ui->motor2Slider->value()));
+    ui->motor3Value->setText(QString::number(ui->motor3Slider->value()));
+    ui->motor4Value->setText(QString::number(ui->motor4Slider->value()));
+    ui->motor5Value->setText(QString::number(ui->motor5Slider->value()));
+    ui->servo1Value->setText(QString::number(ui->servo1Slider->value()));
+    ui->servo2Value->setText(QString::number(ui->servo2Slider->value()));
+}
+void GSMainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+
+    //ui->XTextLabel->setText(QString(event->source()));
+    QCursor::setPos(0,70);
+}
+
+void GSMainWindow::drawFirstGraphics(void)
+{
+    ui->orientationLabel->setPixmap(QPixmap::fromImage(QImage(":/images/resources/images/look.png")));
 }
 

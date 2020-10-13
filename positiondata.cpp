@@ -135,7 +135,7 @@ std::vector<double> positionData::getPositionAndVelocity(std::string time, std::
 
     return data;
 }
-
+// function which recalculates ther basic linear range from -350 to 350 to nonlinear from -100 to 100
 void positionData::recalculateSpaceMousePosition(void)
 {
     int n=2;
@@ -148,6 +148,7 @@ void positionData::recalculateSpaceMousePosition(void)
         point++;
     }
 }
+// function which multiplicates step by precision factor
 void positionData::calculateStep(std::vector<double> &vec, int steeringMode)
 {
     for(auto val = vec.begin(); val!=vec.end(); ++val)
@@ -231,4 +232,48 @@ void positionData::addToPositionAndVelocity(std::string time, double x, double y
     container->pitchVel += pitchVel;
     container->yawVel += yawVel;
 
+}
+void positionData::getDifference(std::string time, positionData &A, std::string timeA, positionData &B, std::string timeB)
+{
+    posAndVel *containerA = nullptr;
+    posAndVel *containerB = nullptr;
+    posAndVel *container = nullptr;
+
+    if(time == "current")
+        container = &current;
+    else if(time == "future")
+        container = &future;
+    else if(time == "past")
+        container = &past;
+    else
+        return;
+
+    if(timeA == "current")
+        containerA = &A.current;
+    else if(timeA == "future")
+        containerA = &A.future;
+    else if(timeA == "past")
+        containerA = &A.past;
+    else return;
+
+    if(timeB == "current")
+        containerB = &B.current;
+    else if(timeB == "future")
+        containerB = &B.future;
+    else if(timeA == "past")
+        containerB = &B.past;
+    else return;
+
+    container->x = containerA->x - containerB->x;
+    container->y = containerA->y - containerB->y;
+    container->z = containerA->z - containerB->z;
+    container->roll = containerA->roll - containerB->roll;
+    container->pitch = containerA->pitch - containerB->pitch;
+    container->yaw = containerA->yaw - containerB->yaw;
+    container->xVel = containerA->xVel - containerB->xVel;
+    container->yVel = containerA->yVel - containerB->yVel;
+    container->zVel = containerA->zVel - containerB->zVel;
+    container->rollVel = containerA->rollVel - containerB->rollVel;
+    container->pitchVel = containerA->pitchVel - containerB->pitchVel;
+    container->yawVel = containerA->yawVel - containerB->yawVel;
 }

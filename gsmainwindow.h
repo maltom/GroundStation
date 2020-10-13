@@ -1,7 +1,7 @@
 #ifndef GSMAINWINDOW_H
 #define GSMAINWINDOW_H
 
-
+// szerokosc 1280 wysokosc 221
 #include <QMainWindow>
 #include <QThread>
 #include "positiondata.h"
@@ -16,46 +16,63 @@ class GSMainWindow : public QMainWindow
 
 private:
     Ui::GSMainWindow *ui;
-    //Threads
+    // Threads
     QThread *videoThread;
     QThread *spaceMouseThread;
-    //Technical Values
+    QThread *drawingThread;
+    // Technical Values
     const int numberOfCams = 2;
-
-    //Modes
+    int x3 =5;
+    // Modes
     int steeringMode = 0;                       // fast = 0, precise = 1
     int cameraChosen = 0;                       // frontal camera = 0, downward camera = 0
-    //positionData
+    int testMode = 0;                           // test Mode for sending custom PWM values
+    // positionData
     positionData spaceMousePositionData;        // only current is in use
-    positionData rovPosition;                   // past - previous timestep, current - present time step, future - set position
-    //Startup functions
+    positionData deviationPositionData;         // only current is in use
+    positionData rovPosition;                   // past - previous timestep, current - present time step (from STM), future - set position
+    // Startup functions
     void videoStart(void);
     void spaceMouseStart(void);
     void modeButtonsInitialization(void);
-    //Casual functions
+    void drawingStart(void);
+    // Casual functions
     void setTargetPosition(void);
+    void calculateDeviation(void);
+    // initial graphics
+    void drawFirstGraphics(void);
+    // mouse events
+    void mouseMoveEvent(QMouseEvent *event);
+
+
 
 public:
     GSMainWindow(QWidget *parent = nullptr);
     ~GSMainWindow();
 
 private slots:
-    void receiveCameraFrame(QImage frame);
-    void receiveCoordinates(int x, int y, int z,
+    void receiveCameraFrame(QImage frame);          // incoming camera view to show
+    void receiveCoordinates(int x, int y, int z,    // incoming coordinates from Space Mouse manipulator
                             int roll, int pitch, int yaw);
-    void receiveSpaceStatus(int status);
-    void receiveCameraStatus(int status);
+    void receiveSpaceStatus(int status);            // status of space mouse
+    void receiveCameraStatus(int status);           // status of camera
+    void receiveOrientationDrawing(QImage drawing);
 
     void changeCamera(void);
     void changeSteeringMode(void);
 
     void printSpaceMouseCoordinates(void);
     void printSetTargetPosition(void);
+    void printDeviation(void);
+    void testModeEnable(int enabled);
+    // showing PWM in test mode
+    void updateMotorPWMValues(void);
 
+    // drawing events
+    //void drawLines(void);
 signals:
     void sendVideoSetup(int device);
-
-
+    void sendDrawingPositions(double x11, double y11, double x21, double y21);
 
     //void
 

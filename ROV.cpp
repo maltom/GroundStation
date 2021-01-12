@@ -20,8 +20,8 @@ ROV::ROV(){
 Matrix3d ROV::Smtrx(Eigen::Vector3d r) {
     Eigen::Matrix3d mtrx;
     mtrx << 0, -r(2), r(1),
-    r(2), 0, -r(0),
-    -r(1), r(0), 0;
+            r(2), 0, -r(0),
+            -r(1), r(0), 0;
     return mtrx;
 }
 
@@ -52,26 +52,26 @@ void ROV::init_geometry(){
 //Initializing drag matrices
 void ROV::init_drag(){
     //Coeffs. of linear drag
-        Xu = -4.03;
-        Yv = -6.22;
-        Zw = 5.18;
-        Kp = -0.07;
-        Mq = -0.07;
-        Nr = -0.07;
+    Xu = -4.03;
+    Yv = -6.22;
+    Zw = 5.18;
+    Kp = -0.07;
+    Mq = -0.07;
+    Nr = -0.07;
 
     //Coeffs. of quadratic drag
-        Xuu = -18.18;
-        Yvv = -21.66;
-        Zww = 36.99;
-        Kpp = -1.55;
-        Mqq = -1.55;
-        Nrr = -1.55;
+    Xuu = -18.18;
+    Yvv = -21.66;
+    Zww = 36.99;
+    Kpp = -1.55;
+    Mqq = -1.55;
+    Nrr = -1.55;
 
     //Creating diagonal matrices
-        vl << Xu,Yv,Zw,Kp,Mq,Nr;
-        vnl << Xuu,Yvv,Zww,Kpp,Mqq,Nrr;
-        Dl = vl.asDiagonal();
-        Dnl = vnl.asDiagonal();
+    vl << Xu,Yv,Zw,Kp,Mq,Nr;
+    vnl << Xuu,Yvv,Zww,Kpp,Mqq,Nrr;
+    Dl = vl.asDiagonal();
+    Dnl = vnl.asDiagonal();
 }
 
 //Initializing thrust configuration matrix
@@ -96,7 +96,7 @@ void ROV::init_thrust(){
 //I've only rewritten it into C++
 Matrix<double, 6, 6> ROV::coriolis_matrix(VectorXd cur_state) {
     //Initializing parameters
-    Matrix<double,6,6> Crb;    
+    Matrix<double,6,6> Crb;
     Matrix<double,6,1> speed;
     Matrix3d M11, M12, M21, M22;
     Vector3d nu1, nu2;
@@ -142,7 +142,7 @@ Matrix<double, 12, 12> ROV::A_state_matrix(VectorXd cur_state) {
 
     //State Space matrix
     A << MatrixXd::Zero(6,6), MatrixXd::Zero(6,6),
-        MatrixXd::Zero(6,6), damping_coeffs;
+            MatrixXd::Zero(6,6), damping_coeffs;
 
     return A;
 
@@ -299,4 +299,15 @@ void ROV::thrust_allocation(VectorXd tau) {
     std::cout << "Alpha 01: " << alpha01 << " alpha 02: " << alpha02 << std::endl;
     std::cout << "u = " << u << std::endl;
 
+}
+
+
+VectorXd ROV::getThrustSignal() const
+{
+    return u;
+}
+
+Vector2d ROV::getAzimuth() const
+{
+    return {alpha01,alpha02};
 }

@@ -59,6 +59,8 @@ public:
     Matrix<double,12,12> A_state_matrix(VectorXd cur_state);
     Matrix<double,12,6> B_state_matrix();
     void thrust_allocation(VectorXd tau);
+    VectorXd getThrustSignal() const;
+    Vector2d getAzimuth() const;
 };
 
 

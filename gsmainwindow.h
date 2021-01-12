@@ -20,6 +20,7 @@ private:
     QThread *videoThread;
     QThread *spaceMouseThread;
     QThread *drawingThread;
+    QThread *regulatorThread;
     // Technical Values
     const int numberOfCams = 2;
     int x3 =5;
@@ -31,11 +32,13 @@ private:
     positionData spaceMousePositionData;        // only current is in use
     positionData deviationPositionData;         // only current is in use
     positionData rovPosition;                   // past - previous timestep, current - present time step (from STM), future - set position
+
     // Startup functions
     void videoStart(void);
     void spaceMouseStart(void);
     void modeButtonsInitialization(void);
     void drawingStart(void);
+    void regulatorStart(void);
     // Casual functions
     void setTargetPosition(void);
     void calculateDeviation(void);

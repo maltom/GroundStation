@@ -18,17 +18,23 @@ DEFINES += QT_DEPRECATED_WARNINGS CT_USE_LAPACK
 SOURCES += \
     communicaton.cpp \
     drawing.cpp \
+    EigenQP.cpp \
+    lqrhandler.cpp \
     main.cpp \
     gsmainwindow.cpp \
     positiondata.cpp \
+    ROV.cpp \
     spacemousecontroller.cpp \
     videoprocess.cpp
 
 HEADERS += \
     communicaton.h \
     drawing.h \
+    EigenQP.h \
     gsmainwindow.h \
+    lqrhandler.h \
     positiondata.h \
+    ROV.h \
     spacemousecontroller.h \
     videoprocess.h
 
@@ -43,7 +49,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += /usr/local/include/opencv /usr/include/libevdev-1.0/
+INCLUDEPATH += /usr/include/opencv4/ /usr/include/libevdev-1.0/
 LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -levdev -llapack -lblas
 
 DISTFILES += \

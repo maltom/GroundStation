@@ -90,9 +90,9 @@ void positionData::setPositionAndVelocity(std::string time, double x, double y, 
 
 }
 
-std::vector<double> positionData::getPositionAndVelocity(std::string time, std::string mode)
+std::vector<double> positionData::getPositionAndVelocity(std::string time, std::string mode) const
 {
-    posAndVel *container = nullptr;
+    const posAndVel *container = nullptr;
     std::vector<double> data;
 
     if(time == "current")
@@ -107,7 +107,7 @@ std::vector<double> positionData::getPositionAndVelocity(std::string time, std::
 
     if(mode == "position")
     {
-        double *point = &container->x;
+        const double *point = &container->x;
         for(int i=0;i <6;++i)
         {
             data.push_back(*point);
@@ -116,7 +116,7 @@ std::vector<double> positionData::getPositionAndVelocity(std::string time, std::
     }
         else if(mode == "velocity")
     {
-        double *point = &container->xVel;
+        const double *point = &container->xVel;
         for(int i=0;i <6;++i)
         {
             data.push_back(*point);
@@ -125,7 +125,7 @@ std::vector<double> positionData::getPositionAndVelocity(std::string time, std::
     }
         else if (mode == "positionAndVelocity")
     {
-        double *point = &container->xVel;
+        const double *point = &container->xVel;
         for(int i=0;i <12;++i)
         {
             data.push_back(*point);
@@ -277,3 +277,4 @@ void positionData::getDifference(std::string time, positionData &A, std::string 
     container->pitchVel = containerA->pitchVel - containerB->pitchVel;
     container->yawVel = containerA->yawVel - containerB->yawVel;
 }
+

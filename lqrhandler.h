@@ -13,11 +13,11 @@
 #include <Eigen/Dense>
 using namespace Eigen;
 
-class LQRHander : public QObject
+class LQRHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit LQRHander(int LQRThreadTimerMiliseconds = 10, positionData* rawPosition = nullptr, QObject *parent = nullptr);
+    explicit LQRHandler(int LQRThreadTimerMiliseconds = 10, positionData* rawPosition = nullptr, QObject *parent = nullptr);
 
 private:
     // regulator

@@ -1,10 +1,10 @@
-#include "lqrhander.h"
+#include "lqrhandler.h"
 /*#include <Eigen/Core>
 #include <Eigen/Dense>*/
 
 using namespace Eigen;
 
-LQRHander::LQRHander(int LQRThreadTimerMiliseconds, positionData* rawPosition, QObject *parent) : QObject(parent), rovPosition(rawPosition)
+LQRHandler::LQRHandler(int LQRThreadTimerMiliseconds, positionData* rawPosition, QObject *parent) : QObject(parent), rovPosition(rawPosition)
 {
     deltaT=1.0/(static_cast<double>(LQRThreadTimerMiliseconds)/1000.0);
     Q.setRandom();
@@ -12,7 +12,7 @@ LQRHander::LQRHander(int LQRThreadTimerMiliseconds, positionData* rawPosition, Q
 }
 
 
-void LQRHander::loadEigenPositions()
+void LQRHandler::loadEigenPositions()
 {
     pastState = actualState;
 
@@ -40,7 +40,7 @@ void LQRHander::loadEigenPositions()
 
 }
 
-void LQRHander::calculateKMatrix()
+void LQRHandler::calculateKMatrix()
 {
     A = rov.A_state_matrix(actualState);
     B = rov.B_state_matrix();
@@ -50,18 +50,18 @@ void LQRHander::calculateKMatrix()
     lqrSolver.compute(Q,R,A,B,K);
 }
 
-void LQRHander::calculateRegulatorFeedbackPose()
+void LQRHandler::calculateRegulatorFeedbackPose()
 {
     this->regulatorFeedbackPosition = -K*actualState;
 
 }
 
-void LQRHander::calculateError()
+void LQRHandler::calculateError()
 {
     this->error = this->desiredPosition - this->regulatorFeedbackPosition;
 }
 
-void LQRHander::update()
+void LQRHandler::update()
 {
     loadEigenPositions();
     calculateKMatrix();

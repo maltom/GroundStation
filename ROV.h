@@ -26,6 +26,8 @@ private:
     VectorXd t5 = VectorXd::Zero(6,1);
     VectorXd u = VectorXd::Zero(5,1);
 
+    VectorXd K = VectorXd::Zero(5,1).asDiagonal();
+
     double alpha01;
     double alpha02;
 
@@ -61,6 +63,7 @@ public:
     void thrust_allocation(VectorXd tau);
     VectorXd getThrustSignal() const;
     Vector2d getAzimuth() const;
+    VectorXd getFutureState(VectorXd currentState, Matrix<double,12,12> A, Matrix<double,12,6> B, VectorXd tau);
 };
 
 

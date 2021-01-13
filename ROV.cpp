@@ -85,6 +85,9 @@ void ROV::init_thrust(){
     t4 << 0,0,-1,-0.11,0.14,0;
     t5 << 0,0,1,0,0.23,0;
 
+    VectorXd KDiag << 40,40,40,40,40,;
+    K = KDiag.asDiagonal();
+
 
     T << t1,t2,t3,t4,t5;
 
@@ -310,4 +313,10 @@ VectorXd ROV::getThrustSignal() const
 Vector2d ROV::getAzimuth() const
 {
     return {alpha01,alpha02};
+}
+
+VectorXd ROV::getFutureState(VectorXd currentState, Matrix<double,12,12> A, Matrix<double,12,6> B, VectorXd u)
+{
+    VectorXd tau = T * K * u;
+    return A*currentState + B*tau;
 }

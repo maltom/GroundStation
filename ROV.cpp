@@ -30,7 +30,7 @@ Matrix3d ROV::Smtrx(Eigen::Vector3d r) {
 void ROV::init_geometry(){
     //Inertia moments
     Ix = 0.3; Iy = 0.3; Iz = 0.3;
-    Ixy=0; Iyx=0; Ixz=0; Izx=0; Iyz=0; Izy=0;
+    Ixy=0.0; Iyx=0.0; Ixz=0.0; Izx=0.0; Iyz=0.0; Izy=0.0;
 
     //Moments of inertia matrix
     Ib << Ix, -Ixy, -Ixz,
@@ -38,7 +38,7 @@ void ROV::init_geometry(){
             -Izx, -Izy, Iz;
 
     //Mass
-    m = 19;
+    m = 19.0;
     //Location of CoG in relation to Center of Origin of axes. It is set to 0.02 in z as it is located at Center of Buoy.
     rg << 0,0,0.02;
 
@@ -85,8 +85,9 @@ void ROV::init_thrust(){
     t4 << 0,0,-1,-0.11,0.14,0;
     t5 << 0,0,1,0,0.23,0;
 
-    VectorXd KDiag << 40,40,40,40,40,;
-    K = KDiag.asDiagonal();
+    VectorXd KDiag = VectorXd::Zero(5);
+    KDiag << 40,40,40,40,40;
+    KAll = KDiag.asDiagonal();
 
 
     T << t1,t2,t3,t4,t5;
@@ -99,8 +100,8 @@ void ROV::init_thrust(){
 //I've only rewritten it into C++
 Matrix<double, 6, 6> ROV::coriolis_matrix(VectorXd cur_state) {
     //Initializing parameters
-    Matrix<double,6,6> Crb;
-    Matrix<double,6,1> speed;
+    Matrix<double,6,6> Crb =Matrix<double,6,6>::Zero(6,6);
+    Matrix<double,6,1> speed = Matrix<double,6,1>::Zero(6,1);
     Matrix3d M11, M12, M21, M22;
     Vector3d nu1, nu2;
 
@@ -110,24 +111,25 @@ Matrix<double, 6, 6> ROV::coriolis_matrix(VectorXd cur_state) {
     nu2 = speed.block(3,0,3,1);
 
     //Creating sub-matrices derived from rigid-body mass matrix
-    Mrb = 0.5*(Mrb * Mrb.transpose());  //Making matrix square
-    M11 = Mrb.topLeftCorner(3,3);
-    M12 = Mrb.topRightCorner(3,3);
-    M21 = Mrb.bottomLeftCorner(3,3);
-    M22 = Mrb.bottomRightCorner(3,3);
+    Matrix<double,6,6>Mrb_square = 0.5*(Mrb * Mrb.transpose());  //Making matrix square
+    M11 = Mrb_square.topLeftCorner(3,3);
+    M12 = Mrb_square.topRightCorner(3,3);
+    M21 = Mrb_square.bottomLeftCorner(3,3);
+    M22 = Mrb_square.bottomRightCorner(3,3);
 
     //Creating Coriolis forces matrix
     Crb << Matrix3d::Zero(3,3), -Smtrx(M11*nu1 + M12*nu2),
             -Smtrx(M11*nu1 + M12*nu2), -Smtrx(M21*nu1 + M22*nu2);
 
     return Crb;
+
 }
 
 
 //Function for creating State Space A matrix.
 //Its definition, sizes and elements are defined in documentation
 Matrix<double, 12, 12> ROV::A_state_matrix(VectorXd cur_state) {
-    Matrix<double,12,12> A = MatrixXd::Zero(12,12);
+    Matrix1212 A = MatrixXd::Zero(12,12);
     Matrix<double,6,1> speed = MatrixXd::Zero(6,1);
     Matrix<double,6,6> damping_coeffs = MatrixXd::Zero(6,6);
     MatrixXd speed_diag = MatrixXd::Zero(6,6);
@@ -144,7 +146,7 @@ Matrix<double, 12, 12> ROV::A_state_matrix(VectorXd cur_state) {
     damping_coeffs = -Mrb.inverse() * damping_coeffs;
 
     //State Space matrix
-    A << MatrixXd::Zero(6,6), MatrixXd::Zero(6,6),
+    A << MatrixXd::Zero(6,6), MatrixXd::Identity(6,6),
             MatrixXd::Zero(6,6), damping_coeffs;
 
     return A;
@@ -299,8 +301,8 @@ void ROV::thrust_allocation(VectorXd tau) {
     u(3) = u2(1);
     u(4) = u2(2);
 
-    std::cout << "Alpha 01: " << alpha01 << " alpha 02: " << alpha02 << std::endl;
-    std::cout << "u = " << u << std::endl;
+    //std::cout << "Alpha 01: " << alpha01 << " alpha 02: " << alpha02 << std::endl;
+    //std::cout << "u = " << u << std::endl;
 
 }
 
@@ -315,8 +317,8 @@ Vector2d ROV::getAzimuth() const
     return {alpha01,alpha02};
 }
 
-VectorXd ROV::getFutureState(VectorXd currentState, Matrix<double,12,12> A, Matrix<double,12,6> B, VectorXd u)
+VectorXd ROV::getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B, VectorXd u,double deltaT)
 {
-    VectorXd tau = T * K * u;
-    return A*currentState + B*tau;
+    VectorXd tau = T * KAll * u;
+    return (A*currentState + B*tau)/**deltaT*/;
 }

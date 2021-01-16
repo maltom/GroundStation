@@ -3,10 +3,13 @@
 #include <opencv2/opencv.hpp>
 #include "videoprocess.h"
 #include "spacemousecontroller.h"
+#include "lqrhandler.h"
+#include "rosnodehandler.h"
 #include "positiondata.h"
 #include "drawing.h"
 #include <QTimer>
 #include <chrono>
+#include <QMetaType>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QImage>
@@ -16,6 +19,9 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     , ui(new Ui::GSMainWindow)
 {
 
+    qRegisterMetaType<Matrix1212>("Matrix1212");
+    qRegisterMetaType<Matrix126>("Matrix612");
+    qRegisterMetaType<Matrix612>("Matrix126");
     /*cv::Mat inputImage = cv::imread("Kasia.jpg");
     if(!inputImage.empty()) cv::imshow("Display Image", inputImage);*/
 
@@ -29,7 +35,10 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     drawFirstGraphics();
     drawingStart();
 
-    centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
+    regulatorStart();
+    rosStart();
+
+    //centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking(true);
 
 
@@ -46,9 +55,17 @@ GSMainWindow::~GSMainWindow()
     drawingThread->quit();
     while(!drawingThread->isFinished());
 
+    regulatorThread->quit();
+    while(!regulatorThread->isFinished());
+
+    rosThread->quit();
+    while(!rosThread->isFinished());
+
     delete videoThread;
     delete spaceMouseThread;
     delete drawingThread;
+    delete regulatorThread;
+    delete rosThread;
     delete ui;
 
 
@@ -128,8 +145,47 @@ void GSMainWindow::drawingStart()
 
     drawingThread->start();
 }
+void GSMainWindow::regulatorStart()
+{
+    regulatorThread = new QThread();
+    regulator = new LQRHandler(this->regulatorTickTime,&rovPosition,nullptr);
+    QTimer *regulatorTimer = new QTimer();
 
+    regulatorTimer->setInterval(this->regulatorTickTime);
 
+    connect(regulatorTimer,SIGNAL(timeout()),regulator,SLOT(update()));
+    connect(regulator,SIGNAL(positionReady()),this,SLOT(printCurrentPosition()));
+    regulatorTimer->start();
+    regulator->moveToThread(regulatorThread);
+    regulatorTimer->moveToThread(regulatorThread);
+
+    regulatorThread->start();
+}
+void GSMainWindow::rosStart()
+{
+    rosThread = new QThread();
+    rosNodeHandler *rosObj = new rosNodeHandler();
+
+    QTimer *rosTimer = new QTimer();
+    //rosTimer->setInterval(this->regulatorTickTime);
+
+    qRegisterMetaType<Matrix1212>("Matrix1212");
+    qRegisterMetaType<Matrix126>("Matrix612");
+    qRegisterMetaType<Matrix612>("Matrix126");
+    //connect(rosObj,SIGNAL(sendK(Matrix612)),regulator,SLOT(receiveK(Matrix612)));
+    connect(rosObj,&rosNodeHandler::sendK,regulator,&LQRHandler::receiveK);
+    //connect(regulator,SIGNAL(sendAB(Matrix1212, Matrix126)),rosObj,SLOT(publishABToMatlab(Matrix1212, Matrix126)));
+    connect(regulator,&LQRHandler::sendAB,rosObj,&rosNodeHandler::publishABToMatlab);
+    //connect(rosTimer,&QTimer::timeout,rosObj,&rosNodeHandler::update);
+
+    //rosTimer->start();
+    rosObj->moveToThread(rosThread);
+    //rosTimer->moveToThread(regulatorThread);
+
+    rosThread->start();
+    QTimer::singleShot(1,rosObj,&rosNodeHandler::update);
+
+}
 void GSMainWindow::receiveCameraFrame(QImage frame)
 {
     ui->label->setPixmap(QPixmap::fromImage(frame));
@@ -202,6 +258,20 @@ void GSMainWindow::printDeviation(void)
     }
 }
 
+void GSMainWindow::printCurrentPosition()
+{
+    std::vector<double> data = rovPosition.getPositionAndVelocity("current","position");
+
+    if(!data.empty())
+    {
+        ui->currentXValue->setText(QString::number(static_cast<int>(data[0]*100)));
+        ui->currentYValue->setText(QString::number(static_cast<int>(data[1]*100)));
+        ui->currentZValue->setText(QString::number(static_cast<int>(data[2]*100)));
+        ui->currentRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
+        ui->currentPitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
+        ui->currentYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
+    }
+}
 void GSMainWindow::receiveSpaceStatus(int status)
 {
     if(status)

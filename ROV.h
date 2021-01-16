@@ -5,7 +5,8 @@
 #ifndef CONTROL_SYSTEM_ROV_H
 #define CONTROL_SYSTEM_ROV_H
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
+#include "typedefs.h"
 using namespace Eigen;
 
 class ROV {
@@ -26,16 +27,16 @@ private:
     VectorXd t5 = VectorXd::Zero(6,1);
     VectorXd u = VectorXd::Zero(5,1);
 
-    VectorXd K = VectorXd::Zero(5,1).asDiagonal();
+    MatrixXd KAll = MatrixXd::Zero(5,5);
 
-    double alpha01;
-    double alpha02;
+    double alpha01 = 0.0;
+    double alpha02 = 0.0;
 
     //Center of Gravity
-    Vector3d rg;
+    Vector3d rg = Vector3d::Zero(3);
 
     //MRB
-    Matrix<double,6,6> Mrb;
+    Matrix<double,6,6> Mrb = Matrix<double,6,6>::Zero(6,6);
 
     //Coeffs. of drag
     double Xu,Yv,Zw,Kp,Mq,Nr;
@@ -58,12 +59,12 @@ public:
     ROV();                                                   //Constructor initializing variables
    // VectorXd states = VectorXd::Zero(12);
     Matrix<double,6,6> coriolis_matrix(VectorXd cur_state);
-    Matrix<double,12,12> A_state_matrix(VectorXd cur_state);
-    Matrix<double,12,6> B_state_matrix();
+    Matrix1212 A_state_matrix(VectorXd cur_state);
+    Matrix126 B_state_matrix();
     void thrust_allocation(VectorXd tau);
     VectorXd getThrustSignal() const;
     Vector2d getAzimuth() const;
-    VectorXd getFutureState(VectorXd currentState, Matrix<double,12,12> A, Matrix<double,12,6> B, VectorXd tau);
+    VectorXd getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B, VectorXd u, double deltaT);
 };
 
 

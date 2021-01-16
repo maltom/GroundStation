@@ -4,11 +4,17 @@
 // szerokosc 1280 wysokosc 221
 #include <QMainWindow>
 #include <QThread>
+#include <Eigen/Dense>
 #include "positiondata.h"
+#include "typedefs.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSMainWindow; }
 QT_END_NAMESPACE
+
+
+
+class LQRHandler;
 
 class GSMainWindow : public QMainWindow
 {
@@ -21,8 +27,13 @@ private:
     QThread *spaceMouseThread;
     QThread *drawingThread;
     QThread *regulatorThread;
+    LQRHandler* regulator;
+
+    QThread *rosThread;
+
     // Technical Values
     const int numberOfCams = 2;
+    static constexpr int regulatorTickTime = 10;
     int x3 =5;
     // Modes
     int steeringMode = 0;                       // fast = 0, precise = 1
@@ -39,6 +50,7 @@ private:
     void modeButtonsInitialization(void);
     void drawingStart(void);
     void regulatorStart(void);
+    void rosStart(void);
     // Casual functions
     void setTargetPosition(void);
     void calculateDeviation(void);
@@ -66,6 +78,7 @@ private slots:
 
     void printSpaceMouseCoordinates(void);
     void printSetTargetPosition(void);
+    void printCurrentPosition();
     void printDeviation(void);
     void testModeEnable(int enabled);
     // showing PWM in test mode

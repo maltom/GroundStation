@@ -167,7 +167,7 @@ void GSMainWindow::rosStart()
     rosNodeHandler *rosObj = new rosNodeHandler();
 
     QTimer *rosTimer = new QTimer();
-    //rosTimer->setInterval(this->regulatorTickTime);
+    rosTimer->setInterval(this->regulatorTickTime);
 
     qRegisterMetaType<Matrix1212>("Matrix1212");
     qRegisterMetaType<Matrix126>("Matrix612");
@@ -176,14 +176,14 @@ void GSMainWindow::rosStart()
     connect(rosObj,&rosNodeHandler::sendK,regulator,&LQRHandler::receiveK);
     //connect(regulator,SIGNAL(sendAB(Matrix1212, Matrix126)),rosObj,SLOT(publishABToMatlab(Matrix1212, Matrix126)));
     connect(regulator,&LQRHandler::sendAB,rosObj,&rosNodeHandler::publishABToMatlab);
-    //connect(rosTimer,&QTimer::timeout,rosObj,&rosNodeHandler::update);
+    connect(rosTimer,&QTimer::timeout,rosObj,&rosNodeHandler::update);
 
-    //rosTimer->start();
+    rosTimer->start();
     rosObj->moveToThread(rosThread);
-    //rosTimer->moveToThread(regulatorThread);
-
+    rosTimer->moveToThread(regulatorThread);
+    //rosObj->update();
     rosThread->start();
-    QTimer::singleShot(1,rosObj,&rosNodeHandler::update);
+    //QTimer::singleShot(1,rosObj,&rosNodeHandler::update);
 
 }
 void GSMainWindow::receiveCameraFrame(QImage frame)

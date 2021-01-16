@@ -93,10 +93,10 @@ void rosNodeHandler::sendKToRegulator(const std_msgs::Float32MultiArray& K)
 }
 void rosNodeHandler::update()
 {
-    /*ros::Rate loop_rate(10); // too fast loop rate crashed the GUI
-    while (ros::ok())
-    {
+    //ros::Rate loop_rate(10); // too fast loop rate crashed the GUI
+    //while (ros::ok())
+    //{
         ros::spinOnce();
-        loop_rate.sleep();
-    }*/
+        //loop_rate.sleep();
+    //}
 }

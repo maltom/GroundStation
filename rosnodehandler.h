@@ -26,6 +26,7 @@ private:
     ros::NodeHandle nodeHandler;
     ros::Publisher rovThrustPublisher;
     ros::Publisher rovAzimPublisher;
+    ros::Publisher trackBallPublisher;
     ros::Publisher regulatorToMatlabPublisher;
     ros::Subscriber regulatorReceiver;
 
@@ -37,6 +38,7 @@ signals:
 public slots:
 
     void publishRovParams(VectorXd position, VectorXd thrusterAzimuth);
+    void publishBallPosition(Vector3d Pose);
     void publishABToMatlab(Matrix1212 A, Matrix126 B);
     void update();
 };

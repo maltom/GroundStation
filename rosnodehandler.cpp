@@ -10,7 +10,7 @@ rosNodeHandler::rosNodeHandler(QObject *parent) : QObject(parent)
     this->rovThrustPublisher = nodeHandler.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1000);
     this->rovAzimPublisher = nodeHandler.advertise<geometry_msgs::Point>("/turtle1/cmd_azim", 1000);
     this->regulatorToMatlabPublisher = nodeHandler.advertise<std_msgs::Float32MultiArray>("/turtle1/AB_mat",1000);
-
+    this->trackBallPublisher = nodeHandler.advertise<geometry_msgs::Point>("/turtle1/cmd_trkBl", 1000);
     this->regulatorReceiver = nodeHandler.subscribe("/turtle1/K_mat",1000,&rosNodeHandler::sendKToRegulator,this);
 }
 
@@ -37,6 +37,15 @@ void rosNodeHandler::publishRovParams(VectorXd position, VectorXd thrusterAzimut
 
     this->rovAzimPublisher.publish(newAzimuth);
     this->rovThrustPublisher.publish(newPosition);
+}
+
+void rosNodeHandler::publishBallPosition(Vector3d Pose)
+{
+    geometry_msgs::Point msg;
+    msg.x = Pose.x();
+    msg.y = Pose.y();
+    msg.z = Pose.z();
+    this->trackBallPublisher.publish(msg);
 }
 
 void rosNodeHandler::publishABToMatlab(Matrix1212 A, Matrix126 B)

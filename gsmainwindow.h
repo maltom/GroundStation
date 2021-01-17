@@ -89,6 +89,7 @@ private slots:
 signals:
     void sendVideoSetup(int device);
     void sendDrawingPositions(double x11, double y11, double x21, double y21);
+    void sendTrackBallPosition(Eigen::Vector3d);
 
     //void
 

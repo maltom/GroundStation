@@ -17,7 +17,7 @@ private:
 signals:
     void sendPictureToDraw(QImage pic);
 
-private slots:
+public slots:
     void receivePositionsToPicture(double x11, double y11, double x21, double y21);
 
 };

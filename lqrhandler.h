@@ -41,7 +41,7 @@ private:
     DiagonalMatrix<double,state_dim> Q;
     DiagonalMatrix<double,control_dim> R;
 
-    Matrix612 K;//=Matrix<double,control_dim,state_dim>::Zero(control_dim,state_dim);
+    Matrix<double,control_dim,state_dim> K = Matrix<double,control_dim,state_dim>::Zero(control_dim,state_dim);
     // x(k-1) in state space
     VectorXd pastState = VectorXd::Zero(12);
     // x(k) in state space
@@ -69,7 +69,7 @@ public slots:
     void receiveK(Matrix612 K);
     void update();
 signals:
-    void positionReady();
+    void positionReady(VectorXd position, VectorXd thrusterAzimuth);
     void sendCalculatedThrust(VectorXd);
     void sendAB(Matrix1212 A, Matrix126 B);
 };

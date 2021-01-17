@@ -68,8 +68,8 @@ public:
     ROV();                                                   //Constructor initializing variables
    // VectorXd states = VectorXd::Zero(12);
     Matrix<double,6,6> coriolis_matrix(VectorXd cur_state);
-    Matrix1212 A_state_matrix(VectorXd cur_state);
-    Matrix126 B_state_matrix();
+    Matrix<double, 12, 12> A_state_matrix(VectorXd cur_state);
+    Matrix<double, 12, 6> B_state_matrix();
     void thrust_allocation(VectorXd tau);
     VectorXd getThrustSignal() const;
     Vector2d getAzimuth() const;

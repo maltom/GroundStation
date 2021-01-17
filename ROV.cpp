@@ -127,10 +127,10 @@ Matrix<double, 6, 6> ROV::coriolis_matrix(VectorXd cur_state) {
     Mrb_temp = 0.5*(Mrb + Mrb.transpose());  //Making matrix square
     Ma_temp = 0.5*(Ma + Ma.transpose());
 
-    M11 = Mrb_square.topLeftCorner(3,3);
-    M12 = Mrb_square.topRightCorner(3,3);
+    M11 = Mrb_temp.topLeftCorner(3,3);
+    M12 = Mrb_temp.topRightCorner(3,3);
     M21 = M12.transpose();
-    M22 = Mrb_square.bottomRightCorner(3,3);
+    M22 = Mrb_temp.bottomRightCorner(3,3);
 
     M11_A = Ma_temp.topLeftCorner(3,3);
     M12_A = Ma_temp.topRightCorner(3,3);

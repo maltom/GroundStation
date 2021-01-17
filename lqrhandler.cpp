@@ -1,3 +1,5 @@
+
+
 #include "lqrhandler.h"
 #include <iostream>
 
@@ -5,7 +7,7 @@ using namespace Eigen;
 
 LQRHandler::LQRHandler(int LQRThreadTimerMiliseconds, positionData* rawPosition, QObject *parent) : QObject(parent), rovPosition(rawPosition)
 {
-    deltaT=1.0/(static_cast<double>(LQRThreadTimerMiliseconds)/1000.0);
+    deltaT=static_cast<double>(LQRThreadTimerMiliseconds)/1000.0;
     VectorXd Qdiag = VectorXd::Zero(state_dim);
     VectorXd Rdiag = VectorXd::Zero(control_dim);
 
@@ -29,7 +31,7 @@ void LQRHandler::loadEigenPositions()
 
 
     //this->actualState = newActualState;
-    std::cout <<"Aktual"<< actualState<<std::endl;
+    //std::cout <<"Aktual"<< actualState<<std::endl;
     VectorXd newDesiredPosition(6);
     const auto posVec2 = rovPosition->getPositionAndVelocity("future","position");
     for(int i=0;i<6;++i)
@@ -38,7 +40,7 @@ void LQRHandler::loadEigenPositions()
     }
     this->desiredPosition = newDesiredPosition;
 
-    std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
+    //std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
     
     
 }
@@ -47,14 +49,17 @@ void LQRHandler::calculateKMatrix()
 {
     A = rov.A_state_matrix(actualState);
     B = rov.B_state_matrix();
-    //ct::optcon::LQR<state_dim,control_dim> lqrSolver;
+#ifndef MATLAB
+    ct::optcon::LQR<state_dim,control_dim> lqrSolver;
     //std::cout<<"zegnajcie"<<std::endl;
     //std::cout <<"K przed"<< K<<std::endl;
     //std::cout<<"Oto QRABiK"<<std::endl<<Q<<std::endl<<std::endl<<R<<std::endl<<std::endl<<A<<std::endl<<std::endl<<B<<std::endl<<std::endl<<K<<std::endl<<std::endl;;
-    //std::cout<<lqrSolver.compute(Q,R,A,B,K,true,true)<<std::endl;
+    lqrSolver.compute(Q,R,A,B,K);
     //std::cout <<"K po"<< K<<std::endl;
     //std::cout<<"jestem jak feniks"<<std::endl;
+#else
     emit sendAB(A,B);
+#endif
 }
 
 void LQRHandler::receiveK(Matrix612 K)
@@ -67,17 +72,24 @@ void LQRHandler::calculateRegulatorFeedbackPose()
 {
     this->regulatorFeedbackPosition = -K*actualState;
 
-    std::cout <<"Kuupa:"<< K<<std::endl;
-    std::cout <<"Sprzenzenie:"<< regulatorFeedbackPosition<<std::endl;
+    //    std::cout <<"Kuupa:"<< K<<std::endl;
+    //    std::cout <<"Sprzenzenie:"<< regulatorFeedbackPosition<<std::endl;
 
 }
 
 void LQRHandler::calculateError()
 {
 
-    this->error = this->desiredPosition + this->regulatorFeedbackPosition;
+    this->error = this->rov.getNbar(A,B,K)*this->desiredPosition + this->regulatorFeedbackPosition;
 
-    std::cout <<"Uhyp:"<< error<<std::endl;
+    for(int i = 0; i<6;++i)
+    {
+        if(error(i)>40)
+            error(i) =40;
+        else if(error(i)<-40)
+            error(i) =-40;
+    }
+    // std::cout <<"Uhyp:"<< error<<std::endl;
 }
 
 
@@ -86,15 +98,21 @@ void LQRHandler::calculateError()
 void LQRHandler::update()
 {
     loadEigenPositions();
-    calculateKMatrix();// Ackchyually let matlab calculate this shit
+    calculateKMatrix();
+#ifndef MATLAB
+
+
+#elif
     if(this->receivedNewK)
     {
+#endif
+
         calculateRegulatorFeedbackPose();
         calculateError();
         this->rov.thrust_allocation(error);
-        this->simulationResultState = /*actualState +*/ this->rov.getFutureState(this->actualState,this->A,this->B,rov.getThrustSignal(),deltaT);
+        this->simulationResultState = /*actualState +*/ this->rov.getFutureState(this->actualState,this->A,this->B,deltaT);
 
-        std::cout <<"Mamy"<< simulationResultState<<std::endl;
+        //std::cout <<"Mamy"<< simulationResultState<<std::endl;
         this->rovPosition->setPositionAndVelocity("current",{simulationResultState[0],
                                                              simulationResultState[1],
                                                              simulationResultState[2],
@@ -108,9 +126,26 @@ void LQRHandler::update()
                                                              simulationResultState[10],
                                                              simulationResultState[11]});
 
-        emit positionReady();
+
         actualState = simulationResultState;
+
+        VectorXd posToSim;
+        posToSim << simulationResultState[0],
+                simulationResultState[1],
+                simulationResultState[2],
+                simulationResultState[3],
+                simulationResultState[4],
+                simulationResultState[5];
+        VectorXd azimToSim = rov.getAzimuth();
+        emit positionReady(posToSim, azimToSim);
+
+#ifndef MATLAB
+
+
+#else
+
         this->receivedNewK = false;
     }
+#endif
 }
 

@@ -138,8 +138,10 @@ void GSMainWindow::drawingStart()
     drawingThread = new QThread();
     drawing *orientationDrawing = new drawing();
 
-    connect(this,SIGNAL(sendDrawingPositions(double,double,double,double)),orientationDrawing,SLOT(receivePositionsToPicture(double,double,double,double)));
+    //connect(this,SIGNAL(sendDrawingPositions(double,double,double,double)),orientationDrawing,SLOT(receivePositionsToPicture(double,double,double,double)));
+    connect(this,&GSMainWindow::sendDrawingPositions,orientationDrawing,&drawing::receivePositionsToPicture);
     connect(orientationDrawing,SIGNAL(sendPictureToDraw(QImage)),this,SLOT(receiveOrientationDrawing(QImage)));
+
 
     orientationDrawing->moveToThread(drawingThread);
 
@@ -154,7 +156,7 @@ void GSMainWindow::regulatorStart()
     regulatorTimer->setInterval(this->regulatorTickTime);
 
     connect(regulatorTimer,SIGNAL(timeout()),regulator,SLOT(update()));
-    connect(regulator,SIGNAL(positionReady()),this,SLOT(printCurrentPosition()));
+    connect(regulator,&LQRHandler::positionReady,this,&GSMainWindow::printCurrentPosition);
     regulatorTimer->start();
     regulator->moveToThread(regulatorThread);
     regulatorTimer->moveToThread(regulatorThread);
@@ -169,13 +171,21 @@ void GSMainWindow::rosStart()
     QTimer *rosTimer = new QTimer();
     rosTimer->setInterval(this->regulatorTickTime);
 
-    qRegisterMetaType<Matrix1212>("Matrix1212");
-    qRegisterMetaType<Matrix126>("Matrix612");
-    qRegisterMetaType<Matrix612>("Matrix126");
+    connect(regulator,&LQRHandler::positionReady,rosObj,&rosNodeHandler::publishRovParams);
+    connect(this,&GSMainWindow::sendTrackBallPosition,rosObj,&rosNodeHandler::publishBallPosition);
+
     //connect(rosObj,SIGNAL(sendK(Matrix612)),regulator,SLOT(receiveK(Matrix612)));
-    connect(rosObj,&rosNodeHandler::sendK,regulator,&LQRHandler::receiveK);
-    //connect(regulator,SIGNAL(sendAB(Matrix1212, Matrix126)),rosObj,SLOT(publishABToMatlab(Matrix1212, Matrix126)));
-    connect(regulator,&LQRHandler::sendAB,rosObj,&rosNodeHandler::publishABToMatlab);
+#ifdef MATLAB
+    {
+        qRegisterMetaType<Matrix1212>("Matrix1212");
+        qRegisterMetaType<Matrix126>("Matrix612");
+        qRegisterMetaType<Matrix612>("Matrix126");
+        geometry_msgs::Point{Pose.x(),Pose.y(),Pose.z()}
+        connect(rosObj,&rosNodeHandler::sendK,regulator,&LQRHandler::receiveK);
+        //connect(regulator,SIGNAL(sendAB(Matrix1212, Matrix126)),rosObj,SLOT(publishABToMatlab(Matrix1212, Matrix126)));
+        connect(regulator,&LQRHandler::sendAB,rosObj,&rosNodeHandler::publishABToMatlab);
+#else
+#endif
     connect(rosTimer,&QTimer::timeout,rosObj,&rosNodeHandler::update);
 
     rosTimer->start();
@@ -241,6 +251,8 @@ void GSMainWindow::printSetTargetPosition(void)
         ui->setRollValue->setText(QString::number(static_cast<int>(data[3]*100)));
         ui->setPitchValue->setText(QString::number(static_cast<int>(data[4]*100)));
         ui->setYawValue->setText(QString::number(static_cast<int>(data[5]*100)));
+        emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
+        emit sendTrackBallPosition(Eigen::Vector3d {data[0],data[1],data[2]});
     }
 }
 void GSMainWindow::printDeviation(void)
@@ -254,7 +266,7 @@ void GSMainWindow::printDeviation(void)
         ui->differenceRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
         ui->differencePitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
         ui->differenceYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
-        emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
+        //emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
     }
 }
 
@@ -271,6 +283,7 @@ void GSMainWindow::printCurrentPosition()
         ui->currentPitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
         ui->currentYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
     }
+    printDeviation();
 }
 void GSMainWindow::receiveSpaceStatus(int status)
 {

@@ -35,12 +35,18 @@ private:
     //Center of Gravity
     Vector3d rg = Vector3d::Zero(3);
 
-    //MRB
+    //Weight and buoyancy
+    double W;
+    double B;
+
+    //MRB and Ma
     Matrix<double,6,6> Mrb = Matrix<double,6,6>::Zero(6,6);
+    Matrix<double, 6,6> Ma = Matrix<double,6,6>::Zero(6,6);
 
     //Coeffs. of drag
     double Xu,Yv,Zw,Kp,Mq,Nr;
     double Xuu, Yvv, Zww, Kpp, Mqq, Nrr;
+    double Xua, Yva, Zwa, Kpa, Mqa, Nra;
     VectorXd vl = VectorXd::Zero(6);
     VectorXd vnl = VectorXd::Zero(6);
     
@@ -48,12 +54,15 @@ private:
     MatrixXd Dl = MatrixXd::Zero(6,6);
     MatrixXd Dnl = MatrixXd::Zero(6,6);
 
+    //Rate of angular acceleration of thruster. Used in thrust allocation
+    double deltaU;
 
 
     static Matrix3d Smtrx(Vector3d r);  //Function creating a special kind of matrix
     void init_geometry();               //Initializing mass, inertia moments, rg
     void init_drag();                   //initializing drag matrices 
     void init_thrust();
+    VectorXd getRestoringForces(VectorXd currentState); //Getting restoring forces vector
 
 public:
     ROV();                                                   //Constructor initializing variables
@@ -64,7 +73,8 @@ public:
     void thrust_allocation(VectorXd tau);
     VectorXd getThrustSignal() const;
     Vector2d getAzimuth() const;
-    VectorXd getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B, VectorXd u, double deltaT);
+    VectorXd getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B, double deltaT);
+    MatrixXd getNbar(Matrix1212 A, Matrix126 B, Matrix612 K);
 };
 
 

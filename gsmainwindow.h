@@ -2,6 +2,7 @@
 #define GSMAINWINDOW_H
 
 // szerokosc 1280 wysokosc 221
+
 #include <QMainWindow>
 #include <QThread>
 #include <Eigen/Dense>
@@ -15,6 +16,7 @@ QT_END_NAMESPACE
 
 
 class LQRHandler;
+class rosVideoProcess;
 
 class GSMainWindow : public QMainWindow
 {
@@ -27,7 +29,9 @@ private:
     QThread *spaceMouseThread;
     QThread *drawingThread;
     QThread *regulatorThread;
+    QThread *sqlThread;
     LQRHandler* regulator;
+    rosVideoProcess *rosVProc = nullptr;
 
     QThread *rosThread;
 
@@ -51,6 +55,7 @@ private:
     void drawingStart(void);
     void regulatorStart(void);
     void rosStart(void);
+    void sqlStart();
     // Casual functions
     void setTargetPosition(void);
     void calculateDeviation(void);
@@ -65,7 +70,7 @@ public:
     GSMainWindow(QWidget *parent = nullptr);
     ~GSMainWindow();
 
-private slots:
+public slots:
     void receiveCameraFrame(QImage frame);          // incoming camera view to show
     void receiveCoordinates(int x, int y, int z,    // incoming coordinates from Space Mouse manipulator
                             int roll, int pitch, int yaw);
@@ -78,7 +83,7 @@ private slots:
 
     void printSpaceMouseCoordinates(void);
     void printSetTargetPosition(void);
-    void printCurrentPosition();
+    void printCurrentPosition(Eigen::VectorXd position, Eigen::VectorXd thrusterAzimuth);
     void printDeviation(void);
     void testModeEnable(int enabled);
     // showing PWM in test mode
@@ -87,6 +92,12 @@ private slots:
     // drawing events
     //void drawLines(void);
 signals:
+    void goPrintSpaceMouseCoordinates();
+    void goSetTargetPosition();
+    void goCalculateDeviation();
+    void goPrintSetTargetPosition();
+    void goPrintDeviation();
+
     void sendVideoSetup(int device);
     void sendDrawingPositions(double x11, double y11, double x21, double y21);
     void sendTrackBallPosition(Eigen::Vector3d);

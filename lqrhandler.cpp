@@ -113,6 +113,8 @@ void LQRHandler::update()
         this->simulationResultState = /*actualState +*/ this->rov.getFutureState(this->actualState,this->A,this->B,deltaT);
 
         //std::cout <<"Mamy"<< simulationResultState<<std::endl;
+        ++ticksElapsed;
+
         this->rovPosition->setPositionAndVelocity("current",{simulationResultState[0],
                                                              simulationResultState[1],
                                                              simulationResultState[2],
@@ -129,15 +131,20 @@ void LQRHandler::update()
 
         actualState = simulationResultState;
 
-        VectorXd posToSim;
+        VectorXd posToSim = VectorXd::Zero(6);
         posToSim << simulationResultState[0],
                 simulationResultState[1],
                 simulationResultState[2],
                 simulationResultState[3],
                 simulationResultState[4],
                 simulationResultState[5];
-        VectorXd azimToSim = rov.getAzimuth();
-        emit positionReady(posToSim, azimToSim);
+        VectorXd azimToSim = VectorXd::Zero(2);
+        azimToSim << rov.getAzimuth().x(), rov.getAzimuth().y();
+
+        emit positionReady(posToSim,azimToSim);
+        emit timePositionReady(static_cast<double>(ticksElapsed)*deltaT, posToSim, azimToSim);
+
+        //std::cout<<"-----------"<<static_cast<double>(ticksElapsed)*deltaT<<"\n";
 
 #ifndef MATLAB
 

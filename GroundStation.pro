@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,7 +25,9 @@ SOURCES += \
     positiondata.cpp \
     ROV.cpp \
     rosnodehandler.cpp \
+    rosvideoprocess.cpp \
     spacemousecontroller.cpp \
+    sqlhandler.cpp \
     typedefs.cpp \
     videoprocess.cpp
 
@@ -38,7 +40,9 @@ HEADERS += \
     positiondata.h \
     ROV.h \
     rosnodehandler.h \
+    rosvideoprocess.h \
     spacemousecontroller.h \
+    sqlhandler.h \
     typedefs.h \
     videoprocess.h
 
@@ -53,7 +57,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 INCLUDEPATH += /usr/include/opencv4/ /usr/include/libevdev-1.0/ /opt/ros/noetic/include/ /opt/ros/noetic/lib/
-LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -levdev -llapack -lblas -L/opt/ros/noetic/lib -lroscpp -lrostime -lcpp_common -lxmlrpcpp -lrosconsole_log4cxx -lrosconsole_backend_interface -lrosconsole -lroscpp_serialization
+LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -levdev -llapack -lblas -L/opt/ros/noetic/lib -lroscpp -lrostime -lcpp_common -lxmlrpcpp -lrosconsole_log4cxx -lrosconsole_backend_interface -lrosconsole -lroscpp_serialization -lcv_bridge
 
 DISTFILES += \
     ../../Desktop/look.png

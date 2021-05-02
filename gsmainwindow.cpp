@@ -1,3 +1,5 @@
+#define ROSCAM
+
 #include "gsmainwindow.h"
 #include "ui_gsmainwindow.h"
 #include <opencv2/opencv.hpp>
@@ -5,8 +7,11 @@
 #include "spacemousecontroller.h"
 #include "lqrhandler.h"
 #include "rosnodehandler.h"
+#include "rosvideoprocess.h"
 #include "positiondata.h"
 #include "drawing.h"
+#include "sqlhandler.h"
+
 #include <QTimer>
 #include <chrono>
 #include <QMetaType>
@@ -19,11 +24,10 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     , ui(new Ui::GSMainWindow)
 {
 
-    qRegisterMetaType<Matrix1212>("Matrix1212");
-    qRegisterMetaType<Matrix126>("Matrix612");
+    qRegisterMetaType<Eigen::VectorXd>("VectorXd");
+    qRegisterMetaType<Eigen::Vector3d>("Vector3d");
     qRegisterMetaType<Matrix612>("Matrix126");
-    /*cv::Mat inputImage = cv::imread("Kasia.jpg");
-    if(!inputImage.empty()) cv::imshow("Display Image", inputImage);*/
+
 
     ui->setupUi(this);
 
@@ -38,9 +42,16 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     regulatorStart();
     rosStart();
 
+    sqlStart();
+
     //centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking(true);
 
+    connect(this,&GSMainWindow::goPrintSpaceMouseCoordinates,this,&GSMainWindow::printSpaceMouseCoordinates);
+    connect(this,&GSMainWindow::goSetTargetPosition,this,&GSMainWindow::setTargetPosition);
+    connect(this,&GSMainWindow::goPrintSetTargetPosition,this,&GSMainWindow::printSetTargetPosition);
+    connect(this,&GSMainWindow::goCalculateDeviation,this,&GSMainWindow::calculateDeviation);
+    connect(this,&GSMainWindow::goPrintDeviation,this,&GSMainWindow::printDeviation);
 
 }
 
@@ -75,6 +86,7 @@ GSMainWindow::~GSMainWindow()
 void GSMainWindow::videoStart()
 {
     videoThread = new QThread();
+#ifndef ROSCAM
     videoProcess *videoStream = new videoProcess();
     QTimer *videoTriggerTimer = new QTimer();
 
@@ -88,13 +100,23 @@ void GSMainWindow::videoStart()
     connect(videoThread,SIGNAL(finished()),videoStream,SLOT(deleteLater()));
     connect(videoThread,SIGNAL(finished()),videoTriggerTimer,SLOT(deleteLater()));
 
+
     videoTriggerTimer->start();
     videoStream->moveToThread(videoThread);
     videoTriggerTimer->moveToThread(videoThread);
+#else
+    this->rosVProc = new rosVideoProcess();
+    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
 
+    this->rosVProc->moveToThread(videoThread);
+#endif
     videoThread->start();
 
+#ifndef ROSCAM
     emit sendVideoSetup(cameraChosen);
+#else
+
+#endif
 }
 void GSMainWindow::spaceMouseStart()
 {
@@ -155,7 +177,7 @@ void GSMainWindow::regulatorStart()
 
     regulatorTimer->setInterval(this->regulatorTickTime);
 
-    connect(regulatorTimer,SIGNAL(timeout()),regulator,SLOT(update()));
+    connect(regulatorTimer,&QTimer::timeout,regulator,&LQRHandler::update);
     connect(regulator,&LQRHandler::positionReady,this,&GSMainWindow::printCurrentPosition);
     regulatorTimer->start();
     regulator->moveToThread(regulatorThread);
@@ -174,6 +196,10 @@ void GSMainWindow::rosStart()
     connect(regulator,&LQRHandler::positionReady,rosObj,&rosNodeHandler::publishRovParams);
     connect(this,&GSMainWindow::sendTrackBallPosition,rosObj,&rosNodeHandler::publishBallPosition);
 
+
+#ifdef ROSCAM
+    connect(rosObj,&rosNodeHandler::sendFrameToProcess,rosVProc,&rosVideoProcess::receiveRosCameraFrame);
+#endif
     //connect(rosObj,SIGNAL(sendK(Matrix612)),regulator,SLOT(receiveK(Matrix612)));
 #ifdef MATLAB
     {
@@ -196,6 +222,21 @@ void GSMainWindow::rosStart()
     //QTimer::singleShot(1,rosObj,&rosNodeHandler::update);
 
 }
+void GSMainWindow::sqlStart()
+{
+    sqlThread = new QThread();
+    sqlHandler *sqlObj = new sqlHandler();
+
+    //QTimer *rosTimer = new QTimer();
+    //rosTimer->setInterval(this->regulatorTickTime);
+    //rosTimer->start();
+    sqlObj->moveToThread(sqlThread);
+    sqlThread->start();
+    //rosObj->update();
+    connect(regulator,&LQRHandler::timePositionReady,sqlObj,&sqlHandler::sendSimDataToServer);
+    //connect(this,&GSMainWindow::sendTrackBallPosition,rosObj,&rosNodeHandler::publishBallPosition);
+}
+
 void GSMainWindow::receiveCameraFrame(QImage frame)
 {
     ui->label->setPixmap(QPixmap::fromImage(frame));
@@ -210,21 +251,22 @@ void GSMainWindow::receiveCoordinates(int x, int y, int z, int roll, int pitch, 
 {
     spaceMousePositionData.setPositionAndVelocity("current", x, y, z, roll, pitch, yaw);    // getting coordinates from space mouse and saving it in object
     spaceMousePositionData.recalculateSpaceMousePosition();                                 // normalizing <-350,350> to <-100,100>
-    printSpaceMouseCoordinates();                                                           // printing
-    setTargetPosition();
+    emit goPrintSpaceMouseCoordinates();
+    emit goSetTargetPosition();
+
 }
 void GSMainWindow::setTargetPosition(void)
 {
     std::vector<double> vec = spaceMousePositionData.getPositionAndVelocity("current","position");  // getting coordinate
     spaceMousePositionData.calculateStep(vec, steeringMode);
     rovPosition.addToPositionAndVelocity("future",vec);
-    printSetTargetPosition();
-    calculateDeviation();
+    emit goCalculateDeviation();
+    emit goPrintSetTargetPosition();
 }
 void GSMainWindow::calculateDeviation(void)
 {
     deviationPositionData.getDifference("current",rovPosition,"future",rovPosition,"current");
-    printDeviation();
+    emit goPrintDeviation();
 }
 
 void GSMainWindow::printSpaceMouseCoordinates(void)
@@ -266,11 +308,11 @@ void GSMainWindow::printDeviation(void)
         ui->differenceRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
         ui->differencePitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
         ui->differenceYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
-        //emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
+        emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
     }
 }
 
-void GSMainWindow::printCurrentPosition()
+void GSMainWindow::printCurrentPosition(Eigen::VectorXd position, Eigen::VectorXd thrusterAzimuth)
 {
     std::vector<double> data = rovPosition.getPositionAndVelocity("current","position");
 
@@ -282,8 +324,8 @@ void GSMainWindow::printCurrentPosition()
         ui->currentRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
         ui->currentPitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
         ui->currentYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
+        emit goCalculateDeviation();
     }
-    printDeviation();
 }
 void GSMainWindow::receiveSpaceStatus(int status)
 {

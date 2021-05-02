@@ -356,9 +356,11 @@ VectorXd ROV::getThrustSignal() const
     return u;
 }
 
-Vector2d ROV::getAzimuth() const
+VectorXd ROV::getAzimuth() const
 {
-    return {alpha01,alpha02};
+    VectorXd res = VectorXd::Zero(2);
+    res << alpha01, alpha02;
+    return res;
 }
 
 VectorXd ROV::getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B,double deltaT)

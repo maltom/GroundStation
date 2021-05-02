@@ -24,6 +24,7 @@ private:
     // time elapsed from one regulator call to another, for calculating velocity
     double deltaT;
     double centimeterPrescaler = 1.0;
+    long long ticksElapsed = 0;
     positionData* rovPosition;
 
     bool receivedNewK = false;
@@ -63,13 +64,12 @@ private:
     void calculateRegulatorFeedbackPose();
     void calculateError();
 
-
-
 public slots:
     void receiveK(Matrix612 K);
     void update();
 signals:
     void positionReady(VectorXd position, VectorXd thrusterAzimuth);
+    void timePositionReady(double timeElapsed, VectorXd position, VectorXd thrusterAzimuth);
     void sendCalculatedThrust(VectorXd);
     void sendAB(Matrix1212 A, Matrix126 B);
 };

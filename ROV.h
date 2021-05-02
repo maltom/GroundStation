@@ -72,7 +72,7 @@ public:
     Matrix<double, 12, 6> B_state_matrix();
     void thrust_allocation(VectorXd tau);
     VectorXd getThrustSignal() const;
-    Vector2d getAzimuth() const;
+    VectorXd getAzimuth() const;
     VectorXd getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B, double deltaT);
     MatrixXd getNbar(Matrix1212 A, Matrix126 B, Matrix612 K);
 };

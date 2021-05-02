@@ -32,6 +32,7 @@ void videoProcess::process(void)
 {
     finalFrame=originalFrame;
     cv::cvtColor(finalFrame,finalFrame,cv::COLOR_BGR2RGB);
+
 }
 
 void videoProcess::receiveCameraSetup(int device)
@@ -55,4 +56,19 @@ void videoProcess::receiveCameraSetup(int device)
         statusCamera = 1;
         emit sendCameraStatus(statusCamera);
     }
+}
+
+void videoProcess::objectTracking()
+{
+
+}
+
+void videoProcess::objectDetection()
+{
+
+}
+
+void videoProcess::transformPicture()
+{
+
 }

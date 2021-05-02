@@ -10,6 +10,7 @@
 #include <std_msgs/MultiArrayDimension.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Image.h>
 
 using namespace Eigen;
 
@@ -21,6 +22,7 @@ public:
     explicit rosNodeHandler(QObject *parent = nullptr);
 
     void sendKToRegulator(const std_msgs::Float32MultiArray& K);
+    void sendRosCameraFrame(const sensor_msgs::Image& cameraFrame);
 private:
 
     ros::NodeHandle nodeHandler;
@@ -29,11 +31,13 @@ private:
     ros::Publisher trackBallPublisher;
     ros::Publisher regulatorToMatlabPublisher;
     ros::Subscriber regulatorReceiver;
+    ros::Subscriber mainCameraReceiver;
 
 
 signals:
 
     void sendK(Matrix612 K);
+    void sendFrameToProcess(const sensor_msgs::Image &cameraFrame);
 
 public slots:
 
@@ -41,6 +45,7 @@ public slots:
     void publishBallPosition(Vector3d Pose);
     void publishABToMatlab(Matrix1212 A, Matrix126 B);
     void update();
+
 };
 
 #endif // ROSNODEHANDLER_H

@@ -19,6 +19,9 @@ private:
     //bool toggleStream;
 
     void process(void);
+    void objectDetection();
+    void objectTracking();
+    void transformPicture();
 
 public:
     explicit videoProcess(QObject *parent = nullptr);

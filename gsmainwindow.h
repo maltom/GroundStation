@@ -25,12 +25,12 @@ class GSMainWindow : public QMainWindow
 private:
     Ui::GSMainWindow *ui;
     // Threads
-    QThread *videoThread;
-    QThread *spaceMouseThread;
-    QThread *drawingThread;
-    QThread *regulatorThread;
-    QThread *sqlThread;
-    LQRHandler* regulator;
+    QThread *videoThread = nullptr;
+    QThread *spaceMouseThread = nullptr;
+    QThread *drawingThread = nullptr;
+    QThread *regulatorThread = nullptr;
+    QThread *sqlThread = nullptr;
+    LQRHandler* regulator = nullptr;
     rosVideoProcess *rosVProc = nullptr;
 
     QThread *rosThread;

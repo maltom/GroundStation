@@ -27,6 +27,7 @@ GSMainWindow::GSMainWindow(QWidget *parent)
     qRegisterMetaType<Eigen::VectorXd>("VectorXd");
     qRegisterMetaType<Eigen::Vector3d>("Vector3d");
     qRegisterMetaType<Matrix612>("Matrix126");
+    qRegisterMetaType<sensor_msgs::Image>("ROSImage");
 
 
     ui->setupUi(this);
@@ -86,7 +87,7 @@ GSMainWindow::~GSMainWindow()
 void GSMainWindow::videoStart()
 {
     videoThread = new QThread();
-//#ifndef ROSCAM
+#ifndef ROSCAM
     videoProcess *videoStream = new videoProcess();
     QTimer *videoTriggerTimer = new QTimer();
 
@@ -104,19 +105,19 @@ void GSMainWindow::videoStart()
     videoTriggerTimer->start();
     videoStream->moveToThread(videoThread);
     videoTriggerTimer->moveToThread(videoThread);
-//#else
-//    this->rosVProc = new rosVideoProcess();
-//    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
+#else
+    this->rosVProc = new rosVideoProcess();
+    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
 
-//    this->rosVProc->moveToThread(videoThread);
-//#endif
+    this->rosVProc->moveToThread(videoThread);
+#endif
     videoThread->start();
 
-//#ifndef ROSCAM
+#ifndef ROSCAM
     emit sendVideoSetup(cameraChosen);
-//#else
+#else
 
-//#endif
+#endif
 }
 void GSMainWindow::spaceMouseStart()
 {
@@ -197,9 +198,7 @@ void GSMainWindow::rosStart()
     connect(this,&GSMainWindow::sendTrackBallPosition,rosObj,&rosNodeHandler::publishBallPosition);
 
 
-#ifdef ROSCAM
-    //connect(rosObj,&rosNodeHandler::sendFrameToProcess,rosVProc,&rosVideoProcess::receiveRosCameraFrame);
-#endif
+
     //connect(rosObj,SIGNAL(sendK(Matrix612)),regulator,SLOT(receiveK(Matrix612)));
 #ifdef MATLAB
     {
@@ -217,9 +216,15 @@ void GSMainWindow::rosStart()
     rosTimer->start();
     rosObj->moveToThread(rosThread);
     rosTimer->moveToThread(regulatorThread);
+
+
     //rosObj->update();
     rosThread->start();
     //QTimer::singleShot(1,rosObj,&rosNodeHandler::update);
+#ifdef ROSCAM
+
+    connect(rosObj,&rosNodeHandler::sendFrameToProcess,rosVProc,&rosVideoProcess::receiveRosCameraFrame);
+#endif
 
 }
 void GSMainWindow::sqlStart()
@@ -239,7 +244,11 @@ void GSMainWindow::sqlStart()
 
 void GSMainWindow::receiveCameraFrame(QImage frame)
 {
-    ui->label->setPixmap(QPixmap::fromImage(frame));
+    // 1.7778 - 16:9 screen
+    if(static_cast<double>(frame.width())/static_cast<double>(frame.height())>=1.7777)
+        ui->label->setPixmap(QPixmap::fromImage(frame.scaledToWidth(1280)));
+    else
+        ui->label->setPixmap(QPixmap::fromImage(frame.scaledToHeight(960)));
 
 }
 void GSMainWindow::receiveOrientationDrawing(QImage drawing)

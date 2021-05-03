@@ -12,7 +12,7 @@ rosNodeHandler::rosNodeHandler(QObject *parent) : QObject(parent)
     //this->regulatorToMatlabPublisher = nodeHandler.advertise<std_msgs::Float32MultiArray>("/turtle1/AB_mat",1000);
     this->trackBallPublisher = nodeHandler.advertise<geometry_msgs::Point>("/gupik/position/trackBall", 1000);
     this->regulatorReceiver = nodeHandler.subscribe("/gupik/position/rov_fdbck",1000,&rosNodeHandler::sendKToRegulator,this);
-    this->mainCameraReceiver = nodeHandler.subscribe("/gupik/camera/mainCamera/image_raw",10000,&rosNodeHandler::sendRosCameraFrame,this);
+    this->mainCameraReceiver = nodeHandler.subscribe("/gupik/camera/mainCamera/image_raw",100,&rosNodeHandler::sendRosCameraFrame,this);
 }
 
 void rosNodeHandler::publishRovParams(VectorXd position, VectorXd thrusterAzimuth)

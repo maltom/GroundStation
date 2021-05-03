@@ -13,9 +13,9 @@ class ROV {
 private:
 
     // Mass and inertia moments
-    int m;
-    double Ix, Iy, Iz;
-    double Ixy, Iyx, Ixz, Izx, Iyz, Izy;
+    double m = 0.0;
+    double Ix = 0.0, Iy = 0.0, Iz = 0.0;
+    double Ixy = 0.0, Iyx = 0.0, Ixz = 0.0, Izx = 0.0, Iyz = 0.0, Izy = 0.0;
     Matrix3d Ib = Matrix3d::Zero(3,3);
 
     //Thrust configuration matrix;
@@ -36,17 +36,17 @@ private:
     Vector3d rg = Vector3d::Zero(3);
 
     //Weight and buoyancy
-    double W;
-    double B;
+    double Wght=0.0;
+    double Buoy=0.0;
 
     //MRB and Ma
     Matrix<double,6,6> Mrb = Matrix<double,6,6>::Zero(6,6);
     Matrix<double, 6,6> Ma = Matrix<double,6,6>::Zero(6,6);
 
     //Coeffs. of drag
-    double Xu,Yv,Zw,Kp,Mq,Nr;
-    double Xuu, Yvv, Zww, Kpp, Mqq, Nrr;
-    double Xua, Yva, Zwa, Kpa, Mqa, Nra;
+    double Xu = 0.0,Yv = 0.0,Zw = 0.0,Kp = 0.0,Mq = 0.0,Nr = 0.0;
+    double Xuu = 0.0, Yvv = 0.0, Zww = 0.0, Kpp = 0.0, Mqq = 0.0, Nrr = 0.0;
+    double Xua = 0.0, Yva = 0.0, Zwa = 0.0, Kpa = 0.0, Mqa = 0.0, Nra = 0.0;
     VectorXd vl = VectorXd::Zero(6);
     VectorXd vnl = VectorXd::Zero(6);
     
@@ -55,7 +55,7 @@ private:
     MatrixXd Dnl = MatrixXd::Zero(6,6);
 
     //Rate of angular acceleration of thruster. Used in thrust allocation
-    double deltaU;
+    double deltaU = 0.0;
 
 
     static Matrix3d Smtrx(Vector3d r);  //Function creating a special kind of matrix

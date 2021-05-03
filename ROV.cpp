@@ -19,9 +19,9 @@ ROV::ROV(){
 //Its definition can be found in Fossen.
 Matrix3d ROV::Smtrx(Eigen::Vector3d r) {
     Eigen::Matrix3d mtrx;
-    mtrx << 0, -r(2), r(1),
-            r(2), 0, -r(0),
-            -r(1), r(0), 0;
+    mtrx << 0.0, -r(2), r(1),
+            r(2), 0.0, -r(0),
+            -r(1), r(0), 0.0;
     return mtrx;
 }
 
@@ -48,7 +48,7 @@ void ROV::init_geometry(){
     Mrb.block(3,3,3,3) = Ib;
 
     // Initializing added mass matrix
-    VectorXd MaDiag(6);
+    VectorXd MaDiag = VectorXd::Zero(6);
     MaDiag << Xua, Yva, Zwa, Kpa, Mqa, Nra;
 
     Ma = (-MaDiag).asDiagonal();
@@ -82,17 +82,17 @@ void ROV::init_drag(){
 
 //Initializing thrust configuration matrix
 void ROV::init_thrust(){
-    alpha01 = 0;
-    alpha02 = 0;
+    alpha01 = 0.0;
+    alpha02 = 0.0;
 
-    t1 << cos(alpha01),sin(alpha01),0,sin(alpha01)*(-0.1235),cos(alpha01)*0.1235,(sin(alpha01) * (0.038)) - (cos(alpha01) * (-0.165));
-    t2 << cos(alpha02),sin(alpha02),0,sin(alpha02) * (-0.1235),cos(alpha02) * 0.1235,(sin(alpha02) * (0.038)) - (cos(alpha02) * (0.165));
-    t3 << 0,0,1,-0.14,-0.175,0;
-    t4 << 0,0,-1,-0.14,0.175,0;
-    t5 << 0,0,1,0,0.224,0;
+    t1 << cos(alpha01),sin(alpha01),0.0,sin(alpha01)*(-0.1235),cos(alpha01)*0.1235,(sin(alpha01) * (0.038)) - (cos(alpha01) * (-0.165));
+    t2 << cos(alpha02),sin(alpha02),0.0,sin(alpha02) * (-0.1235),cos(alpha02) * 0.1235,(sin(alpha02) * (0.038)) - (cos(alpha02) * (0.165));
+    t3 << 0.0,0.0,1.0,-0.14,-0.175,0.0;
+    t4 << 0.0,0.0,-1.0,-0.14,0.175,0.0;
+    t5 << 0.0,0.0,1.0,0.0,0.224,0.0;
 
     VectorXd KDiag = VectorXd::Zero(5);
-    KDiag << 40,40,40,40,40;
+    KDiag << 40.0,40.0,40.0,40.0,40.0;
     KAll = KDiag.asDiagonal();
 
 
@@ -114,9 +114,9 @@ Matrix<double, 6, 6> ROV::coriolis_matrix(VectorXd cur_state) {
     Matrix<double,6,6> Crb = Matrix<double,6,6>::Zero(6,6);
     Matrix<double,6,6> Ca = Matrix<double,6,6>::Zero(6,6);
     Matrix<double,6,1> speed = Matrix<double,6,1>::Zero(6,1);
-    Matrix3d M11, M12, M21, M22;
-    Matrix3d M11_A, M12_A, M21_A, M22_A;
-    Vector3d nu1, nu2;
+    Matrix3d M11 = Matrix3d::Zero(3,3), M12 = Matrix3d::Zero(3,3), M21 = Matrix3d::Zero(3,3), M22 = Matrix3d::Zero(3,3);
+    Matrix3d M11_A = Matrix3d::Zero(3,3), M12_A = Matrix3d::Zero(3,3), M21_A = Matrix3d::Zero(3,3), M22_A = Matrix3d::Zero(3,3);
+    Vector3d nu1 = Vector3d::Zero(3), nu2 = Vector3d::Zero(3);
 
     //Splitting linear and angular velocities into 2 vectors
     speed = cur_state.block(6,0,6,1);
@@ -165,7 +165,7 @@ Matrix<double, 12, 12> ROV::A_state_matrix(VectorXd cur_state) {
     //First I create damping_coeffs matrix which is the sum
     //Of all elements which create opposing forces
     //Then I divide it by -M matrix which comes from State Space equation
-    damping_coeffs = Dnl * speed_diag + coriolis_matrix(cur_state) + Dl;
+    damping_coeffs = Dnl * speed_diag.cwiseAbs() + coriolis_matrix(cur_state) + Dl;
     damping_coeffs = (Mrb+Ma).inverse() * damping_coeffs;
 
     //State Space matrix
@@ -191,10 +191,10 @@ Matrix<double, 12, 6> ROV::B_state_matrix() {
 
 void ROV::thrust_allocation(VectorXd tau) {
     //Initializing thrust conf. matrix for azimuthal thrusters
-    MatrixXd T1(3,1);
-    MatrixXd T2(3,1);
-    MatrixXd T_azimuth(3,2);    //Thrust conf. matrix for 2 azimuthal thrusters, including only x,y,yaw forces
-    VectorXd tau_desired(3,1);  //Vector of desired forces  and moments: x,y,yaw
+    MatrixXd T1 = MatrixXd::Zero(3,1);
+    MatrixXd T2 = MatrixXd::Zero(3,1);
+    MatrixXd T_azimuth = MatrixXd::Zero(3,2);    //Thrust conf. matrix for 2 azimuthal thrusters, including only x,y,yaw forces
+    VectorXd tau_desired = VectorXd::Zero(3,1);  //Vector of desired forces  and moments: x,y,yaw
     T1 << t1(0), t1(1), t1(5);  //t1 and t2 are global thrust conf. matrices including sin and cos
     T2 << t2(0), t2(1), t2(5);
     T_azimuth << T1,T2;
@@ -214,16 +214,16 @@ void ROV::thrust_allocation(VectorXd tau) {
     double u_max = 0.4;
 
     //Cost matrices for quad prog
-    VectorXd Q(3);      //Penalizing the difference between desired tau and generated one
-    VectorXd Om(2);     //Penalizing too fast turn rate - not really important
-    VectorXd W(2);      //Penalizing the power consumption of motors. Not really important as it's taken care of in LQR
-    Q << 1000,1000,1000;
-    Om << 1, 1;
-    W << 300,300;
+    VectorXd Q = VectorXd::Zero(3);      //Penalizing the difference between desired tau and generated one
+    VectorXd Om = VectorXd::Zero(2);     //Penalizing too fast turn rate - not really important
+    VectorXd W = VectorXd::Zero(2);      //Penalizing the power consumption of motors. Not really important as it's taken care of in LQR
+    Q << 1000.0,1000.0,1000.0;
+    Om << 1.0, 1.0;
+    W << 300.0,300.0;
 
     //Diagonal matrix H which is main matrix in quadprog problem. x^T * H * X + f*X
-    VectorXd diag_H(7);
-    diag_H << 2*W, 2*Q, 2*Om;
+    VectorXd diag_H=VectorXd::Zero(7);
+    diag_H << 2.0*W, 2.0*Q, 2.0*Om;
     MatrixXd H = MatrixXd::Zero(7,7);
     H = diag_H.asDiagonal();
 
@@ -269,20 +269,20 @@ void ROV::thrust_allocation(VectorXd tau) {
     //And ci0 vector which corresponds to proper values of bounds
     MatrixXd Lb = MatrixXd::Zero(7,7);
     MatrixXd Ub = MatrixXd::Zero(7,7);
-    VectorXd vec_ones(7);
+    VectorXd vec_ones = VectorXd::Zero(7);
     //The same as in Aeq - I pass tranposed version of matrix so I need to create temp_Ci matrix
     MatrixXd Ci = MatrixXd::Zero(7,14);
     MatrixXd temp_Ci = MatrixXd::Zero(14,7);
     VectorXd ci0 = VectorXd::Zero(14,1);
-    vec_ones << 1,1,0,0,0,1,1;  //u,u,s,s,s,a,a
+    vec_ones << 1.0,1.0,0.0,0.0,0.0,1.0,1.0;  //u,u,s,s,s,a,a
     Lb = vec_ones.asDiagonal(); //Lower bound
     Ub = -Lb;                   //Upper bound
     temp_Ci << Lb,Ub;
     Ci = temp_Ci.transpose();
 
-    ci0 << -u_min, -u_min, 0,0,0,delta_a,delta_a,u_max, u_max,0,0,0,delta_a,delta_a; //Vector of bound valuses
+    ci0 << -u_min, -u_min, 0.0,0.0,0.0,delta_a,delta_a,u_max, u_max,0.0,0.0,0.0,delta_a,delta_a; //Vector of bound valuses
 
-    VectorXd x = VectorXd::Random(7); //Initializing solution vector
+    VectorXd x = VectorXd::Zero(7); //Initializing solution vector
 
     QP::solve_quadprog(H,f,Aeq,Beq,Ci,ci0,x);
 
@@ -302,22 +302,22 @@ void ROV::thrust_allocation(VectorXd tau) {
 
     //Classical THRUST ALLOCATION
     //Here I solve thrust allocation problem in classical way for forces in z,roll,pitch, for other 3 thrusters
-    MatrixXd Thrust_conf(6,3);  //Matrix for only 3 thrusters
+    MatrixXd Thrust_conf = MatrixXd::Zero(6,3);  //Matrix for only 3 thrusters
     MatrixXd Thrust_conf_inv;         //Its pseudoinverse
     Thrust_conf << t3,t4,t5;
     Thrust_conf_inv = Thrust_conf.completeOrthogonalDecomposition().pseudoInverse();
 
     //Matrix of maximum values of thrust force
-    Vector3d diag_K(40,40,40);
+    Vector3d diag_K(40.0,40.0,40.0);
     Matrix3d K;
     K = diag_K.asDiagonal();
 
     //Desired tau for this thrust allocation
-    VectorXd tau_c(6);
-    tau_c << 0,0,tau(2),tau(3),tau(4),0;
+    VectorXd tau_c = VectorXd::Zero(6);
+    tau_c << 0.0,0.0,tau(2),tau(3),tau(4),0.0;
 
     //Final calculated vector of control signal
-    Vector3d u2;
+    Vector3d u2 = Vector3d::Zero(3);
     u2 = K.inverse() * Thrust_conf_inv * tau_c;
 
     //Final vector u which is vector of all control signals for all thrusters
@@ -337,10 +337,10 @@ void ROV::thrust_allocation(VectorXd tau) {
 
     //Making sure that we cannot demand 110% of power
     for(int i =0; i<=4; i++){
-        if(u(i) > 1){
-            u(i) = 1;
-        } else if (u(i) < -1){
-            u(i) = -1;
+        if(u(i) > 1.0){
+            u(i) = 1.0;
+        } else if (u(i) < -1.0){
+            u(i) = -1.0;
         }
     }
 
@@ -366,8 +366,8 @@ VectorXd ROV::getAzimuth() const
 VectorXd ROV::getFutureState(VectorXd currentState, Matrix1212 A, Matrix126 B,double deltaT)
 {
     VectorXd tau = VectorXd::Zero(6);
-    t1 << cos(alpha01),sin(alpha01),0,sin(alpha01)*(-0.1235),cos(alpha01)*0.1235,(sin(alpha01) * (0.038)) - (cos(alpha01) * (-0.165));
-    t2 << cos(alpha02),sin(alpha02),0,sin(alpha02) * (-0.1235),cos(alpha02) * 0.1235,(sin(alpha02) * (0.038)) - (cos(alpha02) * (0.165));
+    t1 << cos(alpha01),sin(alpha01),0.0,sin(alpha01)*(-0.1235),cos(alpha01)*0.1235,(sin(alpha01) * (0.038)) - (cos(alpha01) * (-0.165));
+    t2 << cos(alpha02),sin(alpha02),0.0,sin(alpha02) * (-0.1235),cos(alpha02) * 0.1235,(sin(alpha02) * (0.038)) - (cos(alpha02) * (0.165));
 
     T << t1,t2,t3,t4,t5;
     tau = T * KAll * u;
@@ -390,7 +390,7 @@ VectorXd ROV::getRestoringForces(VectorXd currentState) {
     double ph = currentState(3);
 
     VectorXd RestoringForces = VectorXd::Zero(6);
-    RestoringForces << (W-B)*sin(th), -(W-B)*cos(th)*sin(ph), -(W-B)*cos(th)*cos(ph),
-            rg(2)*W*cos(th)*sin(ph), rg(2)*W*sin(th), 0;
+    RestoringForces << (Wght-Buoy)*sin(th), -(Wght-Buoy)*cos(th)*sin(ph), -(Wght-Buoy)*cos(th)*cos(ph),
+            rg(2)*Wght*cos(th)*sin(ph), rg(2)*Wght*sin(th), 0.0;
     return RestoringForces;
 }

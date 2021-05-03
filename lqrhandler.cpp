@@ -32,7 +32,7 @@ void LQRHandler::loadEigenPositions()
 
     //this->actualState = newActualState;
     //std::cout <<"Aktual"<< actualState<<std::endl;
-    VectorXd newDesiredPosition(6);
+    VectorXd newDesiredPosition = VectorXd::Zero(6);
     const auto posVec2 = rovPosition->getPositionAndVelocity("future","position");
     for(int i=0;i<6;++i)
     {

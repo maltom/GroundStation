@@ -86,7 +86,7 @@ GSMainWindow::~GSMainWindow()
 void GSMainWindow::videoStart()
 {
     videoThread = new QThread();
-#ifndef ROSCAM
+//#ifndef ROSCAM
     videoProcess *videoStream = new videoProcess();
     QTimer *videoTriggerTimer = new QTimer();
 
@@ -104,19 +104,19 @@ void GSMainWindow::videoStart()
     videoTriggerTimer->start();
     videoStream->moveToThread(videoThread);
     videoTriggerTimer->moveToThread(videoThread);
-#else
-    this->rosVProc = new rosVideoProcess();
-    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
+//#else
+//    this->rosVProc = new rosVideoProcess();
+//    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
 
-    this->rosVProc->moveToThread(videoThread);
-#endif
+//    this->rosVProc->moveToThread(videoThread);
+//#endif
     videoThread->start();
 
-#ifndef ROSCAM
+//#ifndef ROSCAM
     emit sendVideoSetup(cameraChosen);
-#else
+//#else
 
-#endif
+//#endif
 }
 void GSMainWindow::spaceMouseStart()
 {
@@ -198,7 +198,7 @@ void GSMainWindow::rosStart()
 
 
 #ifdef ROSCAM
-    connect(rosObj,&rosNodeHandler::sendFrameToProcess,rosVProc,&rosVideoProcess::receiveRosCameraFrame);
+    //connect(rosObj,&rosNodeHandler::sendFrameToProcess,rosVProc,&rosVideoProcess::receiveRosCameraFrame);
 #endif
     //connect(rosObj,SIGNAL(sendK(Matrix612)),regulator,SLOT(receiveK(Matrix612)));
 #ifdef MATLAB

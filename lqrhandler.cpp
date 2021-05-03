@@ -40,7 +40,7 @@ void LQRHandler::loadEigenPositions()
     }
     this->desiredPosition = newDesiredPosition;
 
-    //std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
+    std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
     
     
 }
@@ -51,8 +51,8 @@ void LQRHandler::calculateKMatrix()
     B = rov.B_state_matrix();
 #ifndef MATLAB
     ct::optcon::LQR<state_dim,control_dim> lqrSolver;
-    //std::cout<<"zegnajcie"<<std::endl;
-    //std::cout <<"K przed"<< K<<std::endl;
+//    std::cout<<"zegnajcie"<<std::endl;
+//    std::cout <<"K przed"<< K<<std::endl;
     //std::cout<<"Oto QRABiK"<<std::endl<<Q<<std::endl<<std::endl<<R<<std::endl<<std::endl<<A<<std::endl<<std::endl<<B<<std::endl<<std::endl<<K<<std::endl<<std::endl;;
     lqrSolver.compute(Q,R,A,B,K);
     //std::cout <<"K po"<< K<<std::endl;

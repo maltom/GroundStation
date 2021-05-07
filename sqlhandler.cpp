@@ -16,7 +16,7 @@ void sqlHandler::config()
     dataBase.setPort(3306);
     dataBase.setDatabaseName("aghmari1");
     dataBase.setUserName("aghmari1");
-    dataBase.setPassword("dKfaZ4aVRso3Fab2");
+    dataBase.setPassword("gVzPbmeGMJMYJt78");
     if( !dataBase.open())
     {
         QMessageBox info;

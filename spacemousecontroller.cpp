@@ -78,6 +78,9 @@ void spaceMouseController::receiveCoordinates(void)
                 case 257:
                     emit sendCameraChange();
                     break;
+                case 256:
+                    emit sendCoralProcessingChange();
+                    break;
                     /*case REL_X:
                 y = ev.value;
                 break;

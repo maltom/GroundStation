@@ -1,9 +1,17 @@
 #include "rosvideoprocess.h"
-#include <opencv2/imgproc/imgproc.hpp>
-
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <QFile>
 rosVideoProcess::rosVideoProcess(QObject *parent) : QObject(parent)//, toggleStream(true)
 {
-
+    oneYearPriorCoral = loadFromQrc(":/images/resources/images/oneYearPrior.png");
+    //    cv::imshow("dupa",oneYearPriorCoral);
+    createMask( oneYearPriorCoral, maskedOneYearPriorCoral, maskType::Color );
+    createMask( oneYearPriorCoral, binaryMaskedOneYearPriorCoral, maskType::Binary );
+    oneYearPriorCoralGrayScale = cvtToGrayScale(oneYearPriorCoral);
+    oneYearPriorKeyPointsAndFeatures = detectKeyPointsAndDescriptors(oneYearPriorCoralGrayScale);
+    //    cv::imshow("dupa2",maskedOneYearPriorCoral);
 }
 rosVideoProcess::~rosVideoProcess()
 {
@@ -15,19 +23,34 @@ void rosVideoProcess::receiveRosCameraFrame(const sensor_msgs::Image& incoming)
 
     incomingFrame = cv_bridge::toCvCopy(incoming)->image;
 
-
     process();
-    QImage output((uchar*)processedFrame.data, processedFrame.cols, processedFrame.rows, processedFrame.step, QImage::Format_RGB888);
+    QImage output;
+    if(processedFrame.type() == CV_8UC3)
+    {
+        output = QImage((uchar*)processedFrame.data, processedFrame.cols, processedFrame.rows, processedFrame.step, QImage::Format_RGB888);
+    }
+    else
+    {
+        output = QImage((uchar*)processedFrame.data, processedFrame.cols, processedFrame.rows, processedFrame.step, QImage::Format_Grayscale8);
+    }
 
     emit sendCameraFrame(output);
 }
 
 void rosVideoProcess::process(void)
 {
-    //createMask(incomingFrame);
-    //finalFrame=originalFrame;
-    //cv::cvtColor(processedFrame,processedFrame,cv::COLOR_RGB2HSV);
-
+    if(shouldProcess == 1u)
+    {
+        createMask(incomingFrame,maskedFrame,maskType::Color);
+        //finalFrame=originalFrame;
+        //cv::cvtColor(processedFrame,processedFrame,cv::COLOR_RGB2HSV);
+        processedFrame = maskedFrame;
+        transformPicture(incomingFrame);
+    }
+    else
+    {
+        processedFrame = incomingFrame;
+    }
 }
 
 void rosVideoProcess::changeDetection()
@@ -35,29 +58,58 @@ void rosVideoProcess::changeDetection()
 
 }
 
-void rosVideoProcess::createMask(cv::Mat &procImg)
+void rosVideoProcess::createMask(cv::Mat &inputImg, cv::Mat &outputImg, maskType type)
 {
     cv::Mat hsvImg;
-    cv::cvtColor(procImg,hsvImg,cv::COLOR_RGB2HSV);
+    cv::cvtColor(inputImg,hsvImg,cv::COLOR_RGB2HSV);
+    /*auto deb = channel1MinChar;
+auto deb1 = channel1MaxChar;
+auto deb2 = channel2MinChar;
+auto deb3 = channel2MaxChar;
+auto deb4 = channel3MinChar;
+auto deb5 = channel3MaxChar;*/
+    if( type == maskType::Color )
+    {
+        outputImg = cv::Mat(inputImg.rows,inputImg.cols,CV_8UC3);
+    }
+    if( type == maskType::Binary )
+    {
+        outputImg = cv::Mat(inputImg.rows,inputImg.cols,CV_8UC1);
+    }
     for(int i=0; i<hsvImg.cols;++i)
     {
         for(int j=0; j<hsvImg.rows;++j)
         {
 
             auto pixl = hsvImg.at<cv::Vec3b>(j,i);
-            if( ! ( ( ( pixl[0]>channel1MinChar ) && ( pixl[0]<channel1MaxChar ) ) &&
-                    ( ( pixl[1]>channel2MinChar ) && ( pixl[1]<channel2MaxChar ) ) &&
-                    ( ( pixl[2]>channel3MinChar ) && ( pixl[2]<channel3MaxChar ) ) ) )
+            if( ( ( ( pixl[0]>channel1MinChar ) && ( pixl[0]<channel1MaxChar ) ) &&
+                  ( ( pixl[1]>channel2MinChar ) && ( pixl[1]<channel2MaxChar ) ) &&
+                  ( ( pixl[2]>channel3MinChar ) && ( pixl[2]<channel3MaxChar ) ) ) )
             {
-                maskedFrame.at<cv::Vec3b>(j,i) = procImg.at<cv::Vec3b>(j,i);
+                if( type == maskType::Color )
+                {
+                    outputImg.at<cv::Vec3b>(j,i) = inputImg.at<cv::Vec3b>(j,i);
+                }
+                if( type == maskType::Binary )
+                {
+                    outputImg.at<unsigned char>(j,i) = {255};
+                }
             }
             else
             {
-                maskedFrame.at<cv::Vec3b>(j,i) = 0;
+                if( type == maskType::Color )
+                {
+                    outputImg.at<cv::Vec3b>(j,i) = {0,0,0};
+                }
+                if( type == maskType::Binary )
+                {
+                    outputImg.at<unsigned char>(j,i) = {0};
+                }
             }
         }
     }
-    cv::imshow("dupa",maskedFrame);
+    //cv::imshow("dupa",maskedFrame);
+
 }
 
 //void rosVideoProcess::objectTracking()
@@ -70,7 +122,68 @@ void rosVideoProcess::createMask(cv::Mat &procImg)
 
 //}
 
-void rosVideoProcess::transformPicture()
+cv::Mat rosVideoProcess::cvtToGrayScale(const cv::Mat &inputImg)
+{
+    cv::Mat inputGrayScale;
+    cv::cvtColor(inputImg,inputGrayScale,cv::COLOR_RGB2GRAY);
+    return inputGrayScale;
+}
+
+void rosVideoProcess::transformPicture(cv::Mat& inputImg)
+{
+    auto inputGrayScale = cvtToGrayScale(inputImg);
+    auto inputKptsFtrs = detectKeyPointsAndDescriptors(inputGrayScale);
+    auto indexPairs = matchDescriptors(oneYearPriorKeyPointsAndFeatures.second,inputKptsFtrs.second);
+    cv::Mat img_matches;
+    cv::drawMatches(oneYearPriorCoralGrayScale,oneYearPriorKeyPointsAndFeatures.first,inputGrayScale,inputKptsFtrs.first,indexPairs,img_matches);
+    cv::imshow("DUPA",inputGrayScale);
+    cv::imshow("DUPA2",img_matches);
+
+}
+
+std::vector< cv::DMatch > rosVideoProcess::matchDescriptors(cv::Mat& descriptors1, cv::Mat& descriptors2)
+{
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE);
+    std::vector< cv::DMatch > result;
+    matcher->match(descriptors1,descriptors2,result);
+    std::sort(result.begin(),result.end(),[](const cv::DMatch &a, const cv::DMatch &b) -> bool
+    {
+        return a.distance < b.distance;
+    });
+    result.resize(10);
+    return result;
+
+}
+
+pointsAndFeatures rosVideoProcess::detectKeyPointsAndDescriptors(const cv::Mat& inputImg)
 {
 
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(featureThreshold,octaves,octaveLayers);
+    pointsAndFeatures kptsFtrs;
+
+    detector->detectAndCompute(inputImg,cv::noArray(),kptsFtrs.first,kptsFtrs.second);
+    return kptsFtrs;
+}
+
+
+
+void rosVideoProcess::receiveCoralProcessingOnOff(unsigned int toggle)
+{
+    shouldProcess = toggle;
+}
+
+cv::Mat loadFromQrc(QString qrc, int flag)
+{
+    //double tic = double(getTickCount());
+
+    QFile file(qrc);
+    cv::Mat m;
+    if(file.open(QIODevice::ReadOnly))
+    {
+        qint64 sz = file.size();
+        std::vector<uchar> buf(sz);
+        file.read((char*)buf.data(), sz);
+        m = cv::imdecode(buf, flag);
+    }
+    return m;
 }

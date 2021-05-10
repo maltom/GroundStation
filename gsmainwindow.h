@@ -43,6 +43,7 @@ private:
     int steeringMode = 0;                       // fast = 0, precise = 1
     int cameraChosen = 0;                       // frontal camera = 0, downward camera = 0
     int testMode = 0;                           // test Mode for sending custom PWM values
+    unsigned int coralProcessing = 0u;
     // positionData
     positionData spaceMousePositionData;        // only current is in use
     positionData deviationPositionData;         // only current is in use
@@ -79,6 +80,7 @@ public slots:
     void receiveOrientationDrawing(QImage drawing);
 
     void changeCamera(void);
+    void toggleCoralProcessing();
     void changeSteeringMode(void);
 
     void printSpaceMouseCoordinates(void);
@@ -97,7 +99,7 @@ signals:
     void goCalculateDeviation();
     void goPrintSetTargetPosition();
     void goPrintDeviation();
-
+    void sendCoralProcessingOnOff(unsigned int);
     void sendVideoSetup(int device);
     void sendDrawingPositions(double x11, double y11, double x21, double y21);
     void sendTrackBallPosition(Eigen::Vector3d);

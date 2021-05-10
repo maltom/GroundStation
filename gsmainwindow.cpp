@@ -107,7 +107,6 @@ void GSMainWindow::videoStart()
     videoTriggerTimer->moveToThread(videoThread);
 #else
     this->rosVProc = new rosVideoProcess();
-    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
 
     this->rosVProc->moveToThread(videoThread);
 #endif
@@ -116,7 +115,8 @@ void GSMainWindow::videoStart()
 #ifndef ROSCAM
     emit sendVideoSetup(cameraChosen);
 #else
-
+    connect(rosVProc,&rosVideoProcess::sendCameraFrame,this,&GSMainWindow::receiveCameraFrame);
+    connect(this,&GSMainWindow::sendCoralProcessingOnOff,rosVProc,&rosVideoProcess::receiveCoralProcessingOnOff);
 #endif
 }
 void GSMainWindow::spaceMouseStart()
@@ -132,6 +132,7 @@ void GSMainWindow::spaceMouseStart()
     connect(spaceMouse,SIGNAL(sendCoordinates(int, int, int, int, int, int)),this, SLOT(receiveCoordinates(int, int, int, int, int, int)));
     connect(spaceMouse,SIGNAL(sendSpaceStatus(int)),this,SLOT(receiveSpaceStatus(int)));
     connect(spaceMouse,SIGNAL(sendCameraChange()),this,SLOT(changeCamera()));
+    connect(spaceMouse,&spaceMouseController::sendCoralProcessingChange,this,&GSMainWindow::toggleCoralProcessing);
     connect(spaceMouseThread,SIGNAL(finished()),spaceMouse,SLOT(deleteLater()));
     connect(spaceMouseThread,SIGNAL(finished()),spaceMouseTriggerTimer,SLOT(deleteLater()));
 
@@ -311,12 +312,12 @@ void GSMainWindow::printDeviation(void)
     std::vector<double> data = deviationPositionData.getPositionAndVelocity("current","position");
     if(!data.empty())
     {
-        ui->differenceXValue->setText(QString::number(static_cast<int>(data[0]*100)));
-        ui->differenceYValue->setText(QString::number(static_cast<int>(data[1]*100)));
-        ui->differenceZValue->setText(QString::number(static_cast<int>(data[2]*100)));
-        ui->differenceRollValue->setText(QString::number(static_cast<int>(data[3]*180/M_PI)));
-        ui->differencePitchValue->setText(QString::number(static_cast<int>(data[4]*180/M_PI)));
-        ui->differenceYawValue->setText(QString::number(static_cast<int>(data[5]*180/M_PI)));
+        ui->differenceXValue->setText(QString::number(static_cast<int>(data[0]*100.0)));
+        ui->differenceYValue->setText(QString::number(static_cast<int>(data[1]*100.0)));
+        ui->differenceZValue->setText(QString::number(static_cast<int>(data[2]*100.0)));
+        ui->differenceRollValue->setText(QString::number(static_cast<int>(data[3]*180.0/M_PI)));
+        ui->differencePitchValue->setText(QString::number(static_cast<int>(data[4]*180.0/M_PI)));
+        ui->differenceYawValue->setText(QString::number(static_cast<int>(data[5]*180.0/M_PI)));
         emit sendDrawingPositions(data[0],data[2],data[0],data[1]);
     }
 }
@@ -363,6 +364,19 @@ void GSMainWindow::changeCamera(void)
         cameraChosen = 0;
     }
     emit sendVideoSetup(cameraChosen);
+}
+
+void GSMainWindow::toggleCoralProcessing()
+{
+    if(coralProcessing == 0u)
+    {
+        coralProcessing = 1u;
+    }
+    else
+    {
+        coralProcessing = 0u;
+    }
+    emit sendCoralProcessingOnOff(coralProcessing);
 }
 
 void GSMainWindow::changeSteeringMode(void)

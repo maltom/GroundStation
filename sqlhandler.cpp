@@ -1,5 +1,7 @@
 #include "sqlhandler.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <QMessageBox>
 
 sqlHandler::sqlHandler()
@@ -11,12 +13,26 @@ sqlHandler::sqlHandler()
 
 void sqlHandler::config()
 {
+    std::ifstream dataBasePassFile;
+    dataBasePassFile.open("ssap.txt");
+    if(!dataBasePassFile.is_open())
+    {
+        QMessageBox info;
+        info.setText("No pass file");
+        info.setWindowTitle("Pass file error");
+        info.exec();
+        throw "noPassFile";
+    }
+    std::string p;
+    dataBasePassFile >> p;
+    QString pass(p.c_str());
+    dataBasePassFile.close();
     dataBase = QSqlDatabase::addDatabase("QMYSQL");
     dataBase.setHostName("mysql.agh.edu.pl");
     dataBase.setPort(3306);
     dataBase.setDatabaseName("aghmari1");
     dataBase.setUserName("aghmari1");
-    dataBase.setPassword("gVzPbmeGMJMYJt78");
+    dataBase.setPassword(pass);
     if( !dataBase.open())
     {
         QMessageBox info;

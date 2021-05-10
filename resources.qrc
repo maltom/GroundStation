@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/images">
         <file>resources/images/look.png</file>
+        <file>resources/images/oneYearPrior.png</file>
     </qresource>
 </RCC>

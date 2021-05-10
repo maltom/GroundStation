@@ -31,6 +31,7 @@ signals:
                          int roll, int pitch, int yaw);
     void sendSpaceStatus(int status);
     void sendCameraChange(void);
+    void sendCoralProcessingChange();
 private slots:
     void receiveCoordinates(void);
 

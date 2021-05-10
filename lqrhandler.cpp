@@ -40,7 +40,7 @@ void LQRHandler::loadEigenPositions()
     }
     this->desiredPosition = newDesiredPosition;
 
-    std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
+    //std::cout <<"Chcemy:"<< desiredPosition<<std::endl;
     
     
 }

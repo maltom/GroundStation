@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <QFile>
+
+#include <opencv4/opencv2/calib3d.hpp>
 rosVideoProcess::rosVideoProcess(QObject *parent) : QObject(parent)//, toggleStream(true)
 {
     oneYearPriorCoral = loadFromQrc(":/images/resources/images/oneYearPrior.png");
@@ -45,7 +47,7 @@ void rosVideoProcess::process(void)
         //finalFrame=originalFrame;
         //cv::cvtColor(processedFrame,processedFrame,cv::COLOR_RGB2HSV);
         processedFrame = maskedFrame;
-        transformPicture(incomingFrame);
+        transformIncomingPicture(incomingFrame);
     }
     else
     {
@@ -129,15 +131,24 @@ cv::Mat rosVideoProcess::cvtToGrayScale(const cv::Mat &inputImg)
     return inputGrayScale;
 }
 
-void rosVideoProcess::transformPicture(cv::Mat& inputImg)
+void rosVideoProcess::transformIncomingPicture(cv::Mat& inputImg)
 {
     auto inputGrayScale = cvtToGrayScale(inputImg);
     auto inputKptsFtrs = detectKeyPointsAndDescriptors(inputGrayScale);
     auto indexPairs = matchDescriptors(oneYearPriorKeyPointsAndFeatures.second,inputKptsFtrs.second);
-    cv::Mat img_matches;
+    auto matchingPointsIndexes = matchingPointsArrays( inputKptsFtrs, oneYearPriorKeyPointsAndFeatures, indexPairs );
+    auto estimatedTransform = cv::estimateAffine2D(matchingPointsIndexes.first,matchingPointsIndexes.second);
+    cv::warpAffine( inputImg, transformedFrame, estimatedTransform, {transformedFrame.rows,transformedFrame.cols});
+
+    /*cv::Mat img_matches;
     cv::drawMatches(oneYearPriorCoralGrayScale,oneYearPriorKeyPointsAndFeatures.first,inputGrayScale,inputKptsFtrs.first,indexPairs,img_matches);
     cv::imshow("DUPA",inputGrayScale);
-    cv::imshow("DUPA2",img_matches);
+    cv::imshow("DUPA2",img_matches);*/
+    // trainidx = inputimg queryidx of oneyearprior/original
+    //std::vector<cv::Point2f>
+    //for
+
+
 
 }
 
@@ -150,7 +161,10 @@ std::vector< cv::DMatch > rosVideoProcess::matchDescriptors(cv::Mat& descriptors
     {
         return a.distance < b.distance;
     });
-    result.resize(10);
+    if(result.size() > numberOfKeyPointsForAffine)
+    {
+        result.resize(numberOfKeyPointsForAffine);
+    }
     return result;
 
 }
@@ -165,14 +179,27 @@ pointsAndFeatures rosVideoProcess::detectKeyPointsAndDescriptors(const cv::Mat& 
     return kptsFtrs;
 }
 
-
-
 void rosVideoProcess::receiveCoralProcessingOnOff(unsigned int toggle)
 {
     shouldProcess = toggle;
 }
 
-cv::Mat loadFromQrc(QString qrc, int flag)
+matchingKeyPointArrays rosVideoProcess::matchingPointsArrays(const pointsAndFeatures &inputImg, const pointsAndFeatures &originalImg, const std::vector<cv::DMatch> &matches)
+{
+    matchingKeyPointArrays result;
+    for(auto &in: matches)
+    {
+        if( (in.trainIdx < static_cast<const int>(inputImg.first.size())) && (in.queryIdx < static_cast<const int>(originalImg.first.size())) )
+        {
+            result.first.emplace_back(inputImg.first.at(in.trainIdx).pt);
+            result.second.emplace_back(originalImg.first.at(in.queryIdx).pt);
+        }
+
+    }
+    return result;
+}
+
+cv::Mat loadFromQrc(const QString &qrc, int flag)
 {
     //double tic = double(getTickCount());
 

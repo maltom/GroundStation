@@ -43,22 +43,26 @@ constexpr double featureThreshold = 1000.0;
 constexpr int octaves = 3;
 constexpr int octaveLayers = 3;
 
+constexpr int numberOfKeyPointsForAffine = 10;
+
 using pointsAndFeatures = std::pair<std::vector<cv::KeyPoint>,cv::Mat>;
+using matchingKeyPointArrays = std::pair<std::vector<cv::Point2f>,std::vector<cv::Point2f>>;
 
 class rosVideoProcess : public QObject
 {
     Q_OBJECT
 
 private:
-    cv::Mat incomingFrame = cv::Mat(1920,1080,CV_8UC3);
+    cv::Mat incomingFrame = cv::Mat(1080,1920,CV_8UC3);
+    cv::Mat transformedFrame = cv::Mat(1080,1920,CV_8UC3);
     cv::Mat oneYearPriorCoral;
     cv::Mat oneYearPriorCoralGrayScale;
     cv::Mat maskedOneYearPriorCoral;
     cv::Mat binaryMaskedOneYearPriorCoral;
     pointsAndFeatures oneYearPriorKeyPointsAndFeatures;
-    cv::Mat processedFrame = cv::Mat(1920,1080,CV_8UC3);
+    cv::Mat processedFrame = cv::Mat(1080,1920,CV_8UC3);
     cv::Mat maskedFrame;
-    cv::Mat binaryMaskedFrame = cv::Mat(1920,1080,CV_8UC1);
+    cv::Mat binaryMaskedFrame = cv::Mat(1080,1920,CV_8UC1);
     int statusCamera = 0;
     unsigned int shouldProcess = 0u;
     //bool toggleStream;
@@ -70,11 +74,13 @@ private:
     void createMask(cv::Mat& inputImg, cv::Mat& outputImg, maskType type);
     pointsAndFeatures detectKeyPointsAndDescriptors(const cv::Mat& inputImg);
     std::vector< cv::DMatch > matchDescriptors(cv::Mat& descriptors1, cv::Mat& descriptors2);
+    matchingKeyPointArrays matchingPointsArrays(const pointsAndFeatures &firstImg, const pointsAndFeatures &secondImg, const std::vector<cv::DMatch> &matches);
+
     //void objectTracking();
     /*
     cv::Mat &firstPicture, cv::Mat &oldPicture,
                               cv::Mat& firstPictureMask, cv::Mat& secondPictureMask*/
-    void transformPicture(cv::Mat& inputImg);
+    void transformIncomingPicture(cv::Mat& inputImg);
 
 public:
     explicit rosVideoProcess(QObject *parent = nullptr);
@@ -90,6 +96,6 @@ public slots:
 
 };
 
-cv::Mat loadFromQrc(QString qrc, int flag = cv::IMREAD_UNCHANGED);
+cv::Mat loadFromQrc(const QString &qrc, int flag = cv::IMREAD_UNCHANGED);
 
 #endif // ROSVIDEOPROCESS_H

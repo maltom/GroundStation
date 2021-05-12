@@ -8,12 +8,12 @@
 rosVideoProcess::rosVideoProcess(QObject *parent) : QObject(parent)//, toggleStream(true)
 {
     oneYearPriorCoral = loadFromQrc(":/images/resources/images/oneYearPrior.png");
-    //    cv::imshow("dupa",oneYearPriorCoral);
+    //    cv::imshow("TEST",oneYearPriorCoral);
     createMask( oneYearPriorCoral, maskedOneYearPriorCoral, maskType::Color );
     createMask( oneYearPriorCoral, binaryMaskedOneYearPriorCoral, maskType::Binary );
-    oneYearPriorCoralGrayScale = cvtToGrayScale(oneYearPriorCoral);
+    cvtToGrayScale(oneYearPriorCoral, oneYearPriorCoralGrayScale);
     oneYearPriorKeyPointsAndFeatures = detectKeyPointsAndDescriptors(oneYearPriorCoralGrayScale);
-    //    cv::imshow("dupa2",maskedOneYearPriorCoral);
+    //    cv::imshow("TEST2",maskedOneYearPriorCoral);
 }
 rosVideoProcess::~rosVideoProcess()
 {
@@ -43,11 +43,14 @@ void rosVideoProcess::process(void)
 {
     if(shouldProcess == 1u)
     {
-        createMask(incomingFrame,maskedFrame,maskType::Color);
+        //createMask(incomingFrame,maskedFrame,maskType::Color);
         //finalFrame=originalFrame;
         //cv::cvtColor(processedFrame,processedFrame,cv::COLOR_RGB2HSV);
-        processedFrame = maskedFrame;
-        transformIncomingPicture(incomingFrame);
+
+        transformIncomingPicture(incomingFrame, incomingFrameGray);
+//        processedFrame = transformedFrame;
+        changeDetection();
+
     }
     else
     {
@@ -55,8 +58,37 @@ void rosVideoProcess::process(void)
     }
 }
 
+void rosVideoProcess::morphOpenClose(const cv::Mat &input, cv::Mat &output, const int strelSize)
+{
+    cv::Mat strel = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(strelSize,strelSize)/*,cv::Point(firstStrelDim/2,firstStrelDim/2)*/);
+    cv::Mat intermediate(input.rows,input.cols,input.type());
+
+    cv::morphologyEx(input, intermediate, cv::MORPH_OPEN, strel);
+    cv::morphologyEx(intermediate, output, cv::MORPH_CLOSE, strel);
+
+}
+
 void rosVideoProcess::changeDetection()
 {
+    createMask(incomingFrame, incomingFrameBinaryMasked, maskType::Binary);
+    createMask(incomingFrame, incomingFrameMasked, maskType::Binary);
+
+    cv::Mat incomingFrameMorphed( incomingFrameBinaryMasked.rows,incomingFrameBinaryMasked.cols,incomingFrameBinaryMasked.type());
+    cv::Mat oneYearPriorMorphed( binaryMaskedOneYearPriorCoral.rows, binaryMaskedOneYearPriorCoral.cols, binaryMaskedOneYearPriorCoral.type() );
+
+    morphOpenClose(incomingFrameBinaryMasked, incomingFrameMorphed, firstStrelDim);
+    morphOpenClose(binaryMaskedOneYearPriorCoral, oneYearPriorMorphed, firstStrelDim);
+
+    cv::Mat reductionArea;
+
+    cv::subtract( oneYearPriorMorphed, incomingFrameMorphed, reductionArea);
+
+
+
+    processedFrame = incomingFrameMorphed;
+    //cv::imshow("TEST",oneYearPriorMorphed);
+
+
 
 }
 
@@ -110,7 +142,7 @@ auto deb5 = channel3MaxChar;*/
             }
         }
     }
-    //cv::imshow("dupa",maskedFrame);
+    //cv::imshow("TEST",maskedFrame);
 
 }
 
@@ -124,17 +156,16 @@ auto deb5 = channel3MaxChar;*/
 
 //}
 
-cv::Mat rosVideoProcess::cvtToGrayScale(const cv::Mat &inputImg)
+void rosVideoProcess::cvtToGrayScale(const cv::Mat &inputImg, cv::Mat &inputGrayScaleImg)
 {
-    cv::Mat inputGrayScale;
-    cv::cvtColor(inputImg,inputGrayScale,cv::COLOR_RGB2GRAY);
-    return inputGrayScale;
+    cv::cvtColor(inputImg,inputGrayScaleImg,cv::COLOR_RGB2GRAY);
 }
 
-void rosVideoProcess::transformIncomingPicture(cv::Mat& inputImg)
+// secondInputImg = gray scale img
+void rosVideoProcess::transformIncomingPicture(const cv::Mat& inputImg, cv::Mat &secondInputImg)
 {
-    auto inputGrayScale = cvtToGrayScale(inputImg);
-    auto inputKptsFtrs = detectKeyPointsAndDescriptors(inputGrayScale);
+    cvtToGrayScale(inputImg, secondInputImg);
+    auto inputKptsFtrs = detectKeyPointsAndDescriptors(secondInputImg);
     auto indexPairs = matchDescriptors(oneYearPriorKeyPointsAndFeatures.second,inputKptsFtrs.second);
     auto matchingPointsIndexes = matchingPointsArrays( inputKptsFtrs, oneYearPriorKeyPointsAndFeatures, indexPairs );
     auto estimatedTransform = cv::estimateAffine2D(matchingPointsIndexes.first,matchingPointsIndexes.second);
@@ -142,8 +173,8 @@ void rosVideoProcess::transformIncomingPicture(cv::Mat& inputImg)
 
     /*cv::Mat img_matches;
     cv::drawMatches(oneYearPriorCoralGrayScale,oneYearPriorKeyPointsAndFeatures.first,inputGrayScale,inputKptsFtrs.first,indexPairs,img_matches);
-    cv::imshow("DUPA",inputGrayScale);
-    cv::imshow("DUPA2",img_matches);*/
+    cv::imshow("TEST",inputGrayScale);
+    cv::imshow("TEST2",img_matches);*/
     // trainidx = inputimg queryidx of oneyearprior/original
     //std::vector<cv::Point2f>
     //for

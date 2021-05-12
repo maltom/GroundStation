@@ -21,6 +21,9 @@ enum class maskType
     Binary,
     Color
 };
+constexpr unsigned int rows = 1080;
+constexpr unsigned int cols = 1920;
+
 constexpr double channel1Min = 0.509;
 constexpr double channel1Max = 0.912;
 
@@ -45,6 +48,9 @@ constexpr int octaveLayers = 3;
 
 constexpr int numberOfKeyPointsForAffine = 10;
 
+constexpr int firstStrelDim = 7;
+constexpr int secondStrelDim = 7;
+
 using pointsAndFeatures = std::pair<std::vector<cv::KeyPoint>,cv::Mat>;
 using matchingKeyPointArrays = std::pair<std::vector<cv::Point2f>,std::vector<cv::Point2f>>;
 
@@ -53,24 +59,28 @@ class rosVideoProcess : public QObject
     Q_OBJECT
 
 private:
-    cv::Mat incomingFrame = cv::Mat(1080,1920,CV_8UC3);
-    cv::Mat transformedFrame = cv::Mat(1080,1920,CV_8UC3);
+    cv::Mat incomingFrame = cv::Mat(rows,cols,CV_8UC3);
+    cv::Mat incomingFrameGray = cv::Mat(rows,cols,CV_8UC3);
+    cv::Mat incomingFrameMasked = cv::Mat(rows,cols,CV_8UC3);
+    cv::Mat incomingFrameBinaryMasked = cv::Mat(rows,cols,CV_8UC1);
+
+    cv::Mat transformedFrame = cv::Mat(rows,cols,CV_8UC3);
+
     cv::Mat oneYearPriorCoral;
     cv::Mat oneYearPriorCoralGrayScale;
     cv::Mat maskedOneYearPriorCoral;
     cv::Mat binaryMaskedOneYearPriorCoral;
     pointsAndFeatures oneYearPriorKeyPointsAndFeatures;
-    cv::Mat processedFrame = cv::Mat(1080,1920,CV_8UC3);
-    cv::Mat maskedFrame;
-    cv::Mat binaryMaskedFrame = cv::Mat(1080,1920,CV_8UC1);
+    cv::Mat processedFrame = cv::Mat(rows,cols,CV_8UC3);
     int statusCamera = 0;
     unsigned int shouldProcess = 0u;
     //bool toggleStream;
 
     void process(void);
+    void morphOpenClose(const cv::Mat &input, cv::Mat &output, const int strelSize);
     //void objectDetection();
     void changeDetection();
-    cv::Mat cvtToGrayScale(const cv::Mat &inputImg);
+    void cvtToGrayScale(const cv::Mat &inputImg, cv::Mat &inputGrayScaleImg);
     void createMask(cv::Mat& inputImg, cv::Mat& outputImg, maskType type);
     pointsAndFeatures detectKeyPointsAndDescriptors(const cv::Mat& inputImg);
     std::vector< cv::DMatch > matchDescriptors(cv::Mat& descriptors1, cv::Mat& descriptors2);
@@ -80,7 +90,7 @@ private:
     /*
     cv::Mat &firstPicture, cv::Mat &oldPicture,
                               cv::Mat& firstPictureMask, cv::Mat& secondPictureMask*/
-    void transformIncomingPicture(cv::Mat& inputImg);
+    void transformIncomingPicture(const cv::Mat& inputImg, cv::Mat &secondInputImg);
 
 public:
     explicit rosVideoProcess(QObject *parent = nullptr);

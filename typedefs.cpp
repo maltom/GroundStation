@@ -1,9 +1,3 @@
 #include "typedefs.h"
 
-
-
-
-TypeDefs::TypeDefs()
-{
-
-}
+TypeDefs::TypeDefs() {}

@@ -2,11 +2,10 @@
 #include <ros/ros.h>
 #include <QApplication>
 
-
-int main(int argc, char *argv[])
+int main( int argc, char* argv[] )
 {
-    QApplication a(argc, argv);
-    ros::init(argc,argv,"GroundStation");
+    QApplication a( argc, argv );
+    ros::init( argc, argv, "GroundStation" );
     GSMainWindow w;
 
     w.show();

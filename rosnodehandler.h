@@ -1,7 +1,6 @@
 #ifndef ROSNODEHANDLER_H
 #define ROSNODEHANDLER_H
 
-
 #include "typedefs.h"
 #include <QObject>
 #include <ros/ros.h>
@@ -18,13 +17,12 @@ class rosNodeHandler : public QObject
 {
     Q_OBJECT
 public:
+    explicit rosNodeHandler( QObject* parent = nullptr );
 
-    explicit rosNodeHandler(QObject *parent = nullptr);
+    void sendKToRegulator( const std_msgs::Float32MultiArray& K );
+    void sendRosCameraFrame( const sensor_msgs::Image& cameraFrame );
 
-    void sendKToRegulator(const std_msgs::Float32MultiArray& K);
-    void sendRosCameraFrame(const sensor_msgs::Image& cameraFrame);
 private:
-
     ros::NodeHandle nodeHandler;
     ros::Publisher rovThrustPublisher;
     ros::Publisher rovAzimPublisher;
@@ -33,19 +31,17 @@ private:
     ros::Subscriber regulatorReceiver;
     ros::Subscriber mainCameraReceiver;
 
-
 signals:
 
-    void sendK(Matrix612 K);
-    void sendFrameToProcess(const sensor_msgs::Image &cameraFrame);
+    void sendK( Matrix612 K );
+    void sendFrameToProcess( const sensor_msgs::Image& cameraFrame );
 
 public slots:
 
-    void publishRovParams(VectorXd position, VectorXd thrusterAzimuth);
-    void publishBallPosition(Vector3d Pose);
-    void publishABToMatlab(Matrix1212 A, Matrix126 B);
+    void publishRovParams( VectorXd position, VectorXd thrusterAzimuth );
+    void publishBallPosition( Vector3d Pose );
+    void publishABToMatlab( Matrix1212 A, Matrix126 B );
     void update();
-
 };
 
 #endif // ROSNODEHANDLER_H

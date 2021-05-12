@@ -1,6 +1,3 @@
 #include "communicaton.h"
 
-communicaton::communicaton(QObject *parent) : QObject(parent)
-{
-
-}
+communicaton::communicaton( QObject* parent ) : QObject( parent ) {}

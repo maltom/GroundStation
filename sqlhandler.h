@@ -24,16 +24,15 @@ private:
     void enterData();
     void sendData();
     QSqlDatabase dataBase;
-    QString simUploadName{"Simulation"};
-    unsigned simNumber {0};
-    unsigned tableRows {0};
+    QString simUploadName{ "Simulation" };
+    unsigned simNumber{ 0 };
+    unsigned tableRows{ 0 };
     QSqlTableModel* workingTable;
     QSqlQuery query;
     QString tableUpd;
 public slots:
-    void addLineOfData(double &timeElapsed, VectorXd &position, VectorXd &thrusterAzimuth);
-    void sendSimDataToServer(double timeElapsed, VectorXd position, VectorXd thrusterAzimuth);
-
+    void addLineOfData( double& timeElapsed, VectorXd& position, VectorXd& thrusterAzimuth );
+    void sendSimDataToServer( double timeElapsed, VectorXd position, VectorXd thrusterAzimuth );
 };
 
 #endif // SQLHANDLER_H

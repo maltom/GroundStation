@@ -9,12 +9,12 @@ typedef Eigen::MatrixXd Matrix1212;
 typedef Eigen::MatrixXd Matrix612;
 typedef Eigen::MatrixXd Matrix126;
 
-Q_DECLARE_METATYPE(Matrix1212)
-Q_DECLARE_METATYPE(Eigen::VectorXd)
-Q_DECLARE_METATYPE(Eigen::Vector3d)
-Q_DECLARE_METATYPE(sensor_msgs::Image)
-//Q_DECLARE_METATYPE(Matrix612)
-//Q_DECLARE_METATYPE(Matrix126)
+Q_DECLARE_METATYPE( Matrix1212 )
+Q_DECLARE_METATYPE( Eigen::VectorXd )
+Q_DECLARE_METATYPE( Eigen::Vector3d )
+Q_DECLARE_METATYPE( sensor_msgs::Image )
+// Q_DECLARE_METATYPE(Matrix612)
+// Q_DECLARE_METATYPE(Matrix126)
 
 class TypeDefs
 {

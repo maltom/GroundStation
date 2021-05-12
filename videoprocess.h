@@ -14,27 +14,27 @@ class videoProcess : public QObject
 private:
     cv::Mat originalFrame;
     cv::Mat finalFrame;
-    cv::VideoCapture *cameraPic;
+    cv::VideoCapture* cameraPic;
     int statusCamera = 0;
-    //bool toggleStream;
+    // bool toggleStream;
 
-    void process(void);
+    void process( void );
     void objectDetection();
     void objectTracking();
     void transformPicture();
 
 public:
-    explicit videoProcess(QObject *parent = nullptr);
+    explicit videoProcess( QObject* parent = nullptr );
 
     ~videoProcess();
 
 signals:
-    void sendCameraFrame(QImage finalFrame);
-    void sendCameraStatus(int status);
+    void sendCameraFrame( QImage finalFrame );
+    void sendCameraStatus( int status );
 public slots:
-    void receiveCameraFrame(void);
-    void receiveCameraSetup(int device);
-    //void receiveToggleStream(void);
+    void receiveCameraFrame( void );
+    void receiveCameraSetup( int device );
+    // void receiveToggleStream(void);
 };
 
 #endif // VIDEOPROCESS_H

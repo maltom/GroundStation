@@ -59,7 +59,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 INCLUDEPATH += /usr/local/include/opencv4/ /usr/include/libevdev-1.0/ /opt/ros/noetic/include/ /opt/ros/noetic/lib/
 LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -lopencv_xfeatures2d -lopencv_features2d -lopencv_calib3d -levdev -llapack -lblas -L/opt/ros/noetic/lib -lroscpp -lrostime -lcpp_common -lxmlrpcpp -lrosconsole_log4cxx -lrosconsole_backend_interface -lrosconsole -lroscpp_serialization -lcv_bridge
 
-DISTFILES += \
+DISTFILES += \ \
+    .clang-format
 
 RESOURCES += \
     resources.qrc

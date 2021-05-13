@@ -46,7 +46,7 @@ constexpr double featureThreshold = 1000.0;
 constexpr int octaves             = 3;
 constexpr int octaveLayers        = 3;
 
-constexpr int numberOfKeyPointsForAffine = 10;
+constexpr int numberOfKeyPointsForAffine = 100;
 
 constexpr int firstStrelDim  = 7;
 constexpr int secondStrelDim = 7;

@@ -74,8 +74,8 @@ void rosVideoProcess::morphOpenClose( const cv::Mat& input, cv::Mat& output, con
 
 void rosVideoProcess::changeDetection()
 {
-    createMask( incomingFrame, incomingFrameBinaryMasked, maskType::Binary );
-    createMask( incomingFrame, incomingFrameMasked, maskType::Binary );
+    createMask( transformedFrame, incomingFrameBinaryMasked, maskType::Binary );
+    createMask( transformedFrame, incomingFrameMasked, maskType::Color );
 
     cv::Mat incomingFrameMorphed(
         incomingFrameBinaryMasked.rows, incomingFrameBinaryMasked.cols, incomingFrameBinaryMasked.type() );
@@ -87,10 +87,12 @@ void rosVideoProcess::changeDetection()
 
     cv::Mat reductionArea;
 
-    //    cv::subtract( oneYearPriorMorphed, incomingFrameMorphed, reductionArea);
+    cv::subtract( oneYearPriorMorphed, incomingFrameMorphed, reductionArea );
 
     processedFrame = incomingFrameMorphed;
-    // cv::imshow("TEST",oneYearPriorMorphed);
+    cv::imshow( "TEST", oneYearPriorMorphed );
+    cv::imshow( "TEST2", incomingFrameMorphed );
+    cv::imshow( "TEST3", transformedFrame );
 }
 
 void rosVideoProcess::createMask( cv::Mat& inputImg, cv::Mat& outputImg, maskType type )
@@ -169,15 +171,22 @@ void rosVideoProcess::transformIncomingPicture( const cv::Mat& inputImg, cv::Mat
     auto indexPairs            = matchDescriptors( oneYearPriorKeyPointsAndFeatures.second, inputKptsFtrs.second );
     auto matchingPointsIndexes = matchingPointsArrays( inputKptsFtrs, oneYearPriorKeyPointsAndFeatures, indexPairs );
     auto estimatedTransform    = cv::estimateAffine2D( matchingPointsIndexes.first, matchingPointsIndexes.second );
-    cv::warpAffine( inputImg, transformedFrame, estimatedTransform, { transformedFrame.rows, transformedFrame.cols } );
+    cv::warpAffine( inputImg,
+                    transformedFrame,
+                    estimatedTransform,
+                    { oneYearPriorCoralGrayScale.cols, oneYearPriorCoralGrayScale.rows } );
 
-    /*cv::Mat img_matches;
-    cv::drawMatches(oneYearPriorCoralGrayScale,oneYearPriorKeyPointsAndFeatures.first,inputGrayScale,inputKptsFtrs.first,indexPairs,img_matches);
-    cv::imshow("TEST",inputGrayScale);
-    cv::imshow("TEST2",img_matches);*/
+    cv::imshow( "TEST4", secondInputImg );
+    cv::Mat img_matches;
+    cv::drawMatches( oneYearPriorCoralGrayScale,
+                     oneYearPriorKeyPointsAndFeatures.first,
+                     secondInputImg,
+                     inputKptsFtrs.first,
+                     indexPairs,
+                     img_matches );
+
+    cv::imshow( "TEST5", img_matches );
     // trainidx = inputimg queryidx of oneyearprior/original
-    // std::vector<cv::Point2f>
-    // for
 }
 
 std::vector< cv::DMatch > rosVideoProcess::matchDescriptors( cv::Mat& descriptors1, cv::Mat& descriptors2 )

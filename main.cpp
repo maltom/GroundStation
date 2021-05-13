@@ -5,7 +5,6 @@
 int main( int argc, char* argv[] )
 {
     QApplication a( argc, argv );
-    ros::init( argc, argv, "GroundStation" );
     GSMainWindow w;
 
     w.show();

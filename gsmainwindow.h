@@ -17,7 +17,6 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 class LQRHandler;
-class rosVideoProcess;
 
 class GSMainWindow : public QMainWindow
 {
@@ -32,7 +31,6 @@ private:
     QThread* regulatorThread  = nullptr;
     QThread* sqlThread        = nullptr;
     LQRHandler* regulator     = nullptr;
-    rosVideoProcess* rosVProc = nullptr;
 
     QThread* rosThread;
 

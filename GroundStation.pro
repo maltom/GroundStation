@@ -24,10 +24,7 @@ SOURCES += \
     gsmainwindow.cpp \
     positiondata.cpp \
     ROV.cpp \
-    rosnodehandler.cpp \
-    rosvideoprocess.cpp \
     spacemousecontroller.cpp \
-    sqlhandler.cpp \
     typedefs.cpp \
     videoprocess.cpp
 
@@ -39,10 +36,7 @@ HEADERS += \
     lqrhandler.h \
     positiondata.h \
     ROV.h \
-    rosnodehandler.h \
-    rosvideoprocess.h \
     spacemousecontroller.h \
-    sqlhandler.h \
     typedefs.h \
     videoprocess.h
 
@@ -57,7 +51,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 INCLUDEPATH += /usr/local/include/opencv4/ /usr/include/libevdev-1.0/ /opt/ros/noetic/include/ /opt/ros/noetic/lib/
-LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -lopencv_xfeatures2d -lopencv_features2d -lopencv_calib3d -levdev -llapack -lblas -L/opt/ros/noetic/lib -lroscpp -lrostime -lcpp_common -lxmlrpcpp -lrosconsole_log4cxx -lrosconsole_backend_interface -lrosconsole -lroscpp_serialization -lcv_bridge
+LIBS += -L/usr/local/lib -lopencv_highgui -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -lopencv_highgui -lopencv_xfeatures2d -lopencv_features2d -lopencv_calib3d -levdev -llapack -lblas -lcpp_common -lxmlrpcpp -lcv_bridge
 
 DISTFILES += \ \
     .clang-format

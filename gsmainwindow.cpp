@@ -35,9 +35,6 @@ GSMainWindow::GSMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     drawingStart();
 
     regulatorStart();
-    rosStart();
-
-    sqlStart();
 
     // centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking( true );
@@ -67,15 +64,10 @@ GSMainWindow::~GSMainWindow()
     while( !regulatorThread->isFinished() )
         ;
 
-    rosThread->quit();
-    while( !rosThread->isFinished() )
-        ;
-
     delete videoThread;
     delete spaceMouseThread;
     delete drawingThread;
     delete regulatorThread;
-    delete rosThread;
     delete ui;
 }
 

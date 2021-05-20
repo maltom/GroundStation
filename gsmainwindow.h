@@ -29,10 +29,7 @@ private:
     QThread* spaceMouseThread = nullptr;
     QThread* drawingThread    = nullptr;
     QThread* regulatorThread  = nullptr;
-    QThread* sqlThread        = nullptr;
     LQRHandler* regulator     = nullptr;
-
-    QThread* rosThread;
 
     // Technical Values
     const int numberOfCams                 = 2;
@@ -54,8 +51,6 @@ private:
     void modeButtonsInitialization( void );
     void drawingStart( void );
     void regulatorStart( void );
-    void rosStart( void );
-    void sqlStart();
     // Casual functions
     void setTargetPosition( void );
     void calculateDeviation( void );

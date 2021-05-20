@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,6 +25,14 @@ SOURCES += \
     positiondata.cpp \
     ROV.cpp \
     spacemousecontroller.cpp \
+    src/Rov_Tcp_Client_Qt/Ahrs/ahrsconfigure.cpp \
+    src/Rov_Tcp_Client_Qt/Ahrs/ahrsreaddata.cpp \
+    src/Rov_Tcp_Client_Qt/Motor_Control/motor_control.cpp \
+    src/Rov_Tcp_Client_Qt/Pressure/pressure.cpp \
+    src/Rov_Tcp_Client_Qt/Tcp_Connection/tcpclientsocket.cpp \
+    src/Rov_Tcp_Client_Qt/gupikmodules.cpp \
+    src/Rov_Tcp_Client_Qt/lykacz/lykacz.cpp \
+    tcpconnectionhandler.cpp \
     typedefs.cpp \
     videoprocess.cpp
 
@@ -37,11 +45,19 @@ HEADERS += \
     positiondata.h \
     ROV.h \
     spacemousecontroller.h \
+    src/Rov_Tcp_Client_Qt/Ahrs/ahrsconfigure.h \
+    src/Rov_Tcp_Client_Qt/Ahrs/ahrsreaddata.h \
+    src/Rov_Tcp_Client_Qt/Motor_Control/motor_control.h \
+    src/Rov_Tcp_Client_Qt/Pressure/pressure.h \
+    src/Rov_Tcp_Client_Qt/Tcp_Connection/tcpclientsocket.h \
+    src/Rov_Tcp_Client_Qt/gupikmodules.h \
+    src/Rov_Tcp_Client_Qt/lykacz/lykacz.h \
+    tcpconnectionhandler.h \
     typedefs.h \
     videoprocess.h
 
 FORMS += \
-    gsmainwindow.ui
+    gsmainwindow.ui \
 
 TRANSLATIONS += \
     GroundStation_en_US.ts

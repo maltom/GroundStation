@@ -1,4 +1,4 @@
-
+﻿
 #include "gsmainwindow.h"
 #include "ui_gsmainwindow.h"
 #include <opencv2/opencv.hpp>
@@ -74,7 +74,7 @@ GSMainWindow::~GSMainWindow()
 void GSMainWindow::videoStart()
 {
     videoThread = new QThread();
-#ifndef ROSCAM
+
     videoProcess* videoStream = new videoProcess();
     QTimer* videoTriggerTimer = new QTimer();
 
@@ -91,19 +91,10 @@ void GSMainWindow::videoStart()
     videoTriggerTimer->start();
     videoStream->moveToThread( videoThread );
     videoTriggerTimer->moveToThread( videoThread );
-#else
-    this->rosVProc = new rosVideoProcess();
 
-    this->rosVProc->moveToThread( videoThread );
-#endif
     videoThread->start();
 
-#ifndef ROSCAM
-    emit sendVideoSetup( cameraChosen );
-#else
-    connect( rosVProc, &rosVideoProcess::sendCameraFrame, this, &GSMainWindow::receiveCameraFrame );
-    connect( this, &GSMainWindow::sendCoralProcessingOnOff, rosVProc, &rosVideoProcess::receiveCoralProcessingOnOff );
-#endif
+	emit sendVideoSetup( cameraChosen );
 }
 void GSMainWindow::spaceMouseStart()
 {
@@ -140,6 +131,11 @@ void GSMainWindow::tcpHandlerStart( void )
 
     connect( this, &GSMainWindow::openConnection, connectionHandler, &tcpConnectionHandler::openConnection );
     connect( this, &GSMainWindow::closeConnection, connectionHandler, &tcpConnectionHandler::closeConnection );
+
+    connect( this, &GSMainWindow::openGripper, connectionHandler, &tcpConnectionHandler::sendOpenGripper );
+    connect( this, &GSMainWindow::closeGripper, connectionHandler, &tcpConnectionHandler::sendCloseGripper );
+    connect( this, &GSMainWindow::openGulper, connectionHandler, &tcpConnectionHandler::sendOpenGulper );
+    connect( this, &GSMainWindow::closeGulper, connectionHandler, &tcpConnectionHandler::sendCloseGulper );
 }
 
 void GSMainWindow::initializeTcpConnection( void )
@@ -161,7 +157,14 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->servo1Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
     connect( ui->servo2Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
 
-    connect( ui->connectButton, SIGNAL( released() ), this, SLOT( toggleConnection() ) );
+    connect( ui->connectButton, &QPushButton::released, this, &GSMainWindow::toggleConnection );
+
+    connect( ui->openButton, &QPushButton::released, this, &GSMainWindow::parseOpenGripper );
+    connect( ui->closeButton, &QPushButton::released, this, &GSMainWindow::parseCloseGripper );
+    connect( ui->clenchButton, &QPushButton::released, this, &GSMainWindow::parseClenchGripper );
+    connect( ui->stretchButton, &QPushButton::released, this, &GSMainWindow::parseStretchGripper );
+    connect( ui->openGulperButton, &QPushButton::released, this, &GSMainWindow::parseOpenGulper );
+    connect( ui->closeGulperButton, &QPushButton::released, this, &GSMainWindow::parseCloseGulper );
 }
 void GSMainWindow::drawingStart()
 {
@@ -290,7 +293,7 @@ void GSMainWindow::printCurrentPosition( Eigen::VectorXd position, Eigen::Vector
 }
 void GSMainWindow::receiveSpaceStatus( int status )
 {
-    if( status )
+    if( status == 1 )
         ui->spaceStatusLabel->setStyleSheet( ( "QLabel { background-color : darkGreen;}" ) );
     else
         ui->spaceStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
@@ -299,7 +302,7 @@ void GSMainWindow::receiveSpaceStatus( int status )
 void GSMainWindow::receiveCameraStatus( int status )
 {
 
-    if( status )
+    if( status == 1 )
         ui->cameraStatusLabel->setStyleSheet( ( "QLabel { background-color : darkGreen;}" ) );
     else
         ui->cameraStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
@@ -307,11 +310,17 @@ void GSMainWindow::receiveCameraStatus( int status )
 
 void GSMainWindow::receiveConnectionStatus( int status )
 {
-
-    if( status )
+    connectionStatus = status;
+    if( status == 1 )
+    {
         ui->connectionStatusLabel->setStyleSheet( ( "QLabel { background-color : darkGreen;}" ) );
+        ui->connectButton->setText( "Disconnect" );
+    }
     else
+    {
         ui->connectionStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
+        ui->connectButton->setText( "Roll out!" );
+    }
 }
 
 void GSMainWindow::changeCamera( void )
@@ -383,7 +392,7 @@ void GSMainWindow::drawFirstGraphics( void )
     ui->orientationLabel->setPixmap( QPixmap::fromImage( QImage( ":/images/resources/images/look.png" ) ) );
 }
 
-void GSMainWindow::toggleConnection( void )
+void GSMainWindow::toggleConnection()
 {
     if( connectionStatus == 1 )
     {
@@ -393,4 +402,29 @@ void GSMainWindow::toggleConnection( void )
     {
         emit closeConnection();
     }
+}
+
+void GSMainWindow::parseOpenGripper()
+{
+    emit openGripper();
+}
+void GSMainWindow::parseCloseGripper()
+{
+    emit closeGripper();
+}
+void GSMainWindow::parseClenchGripper()
+{
+    emit clenchGripper();
+}
+void GSMainWindow::parseStretchGripper()
+{
+    emit stretchGripper();
+}
+void GSMainWindow::parseOpenGulper()
+{
+    emit openGulper();
+}
+void GSMainWindow::parseCloseGulper()
+{
+    emit closeGulper();
 }

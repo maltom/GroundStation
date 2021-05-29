@@ -66,8 +66,17 @@ private:
     void initializeTcpConnection( void );
     // mouse events
     void mouseMoveEvent( QMouseEvent* event );
+private slots:
     // connection
-    void toggleConnection( void );
+    void toggleConnection();
+    void parseOpenGripper();
+    void parseCloseGripper();
+    // close completely
+    void parseClenchGripper();
+    // open completely
+    void parseStretchGripper();
+    void parseOpenGulper();
+    void parseCloseGulper();
 
 public:
     GSMainWindow( QWidget* parent = nullptr );
@@ -111,6 +120,14 @@ signals:
     void sendVideoSetup( int device );
     void openConnection();
     void closeConnection();
+    void openGripper();
+    void closeGripper();
+    // close completely
+    void clenchGripper();
+    // open completely
+    void stretchGripper();
+    void openGulper();
+    void closeGulper();
 
     void sendDrawingPositions( double x11, double y11, double x21, double y21 );
 

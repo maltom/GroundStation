@@ -1015,6 +1015,72 @@ background-color: rgb(203, 12, 41);
     </property>
     <layout class="QGridLayout" name="gridLayout_7">
      <item row="1" column="3">
+      <widget class="QGroupBox" name="gulperBox">
+       <property name="title">
+        <string>Gulper</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_12">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="openGulperButton">
+          <property name="text">
+           <string>Open</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="closeGulperButton">
+          <property name="text">
+           <string>Close</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="generalBox">
+       <property name="title">
+        <string>General</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="1" column="0">
+         <widget class="QPushButton" name="toggleCameraButton">
+          <property name="text">
+           <string>Toggle Camera</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="connectButton">
+          <property name="text">
+           <string>Roll out!</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="toggleSteeringModeButton">
+          <property name="text">
+           <string>Toggle Precision</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="2">
       <widget class="QGroupBox" name="gripperBox">
        <property name="title">
         <string>Gripper</string>
@@ -1051,119 +1117,18 @@ background-color: rgb(203, 12, 41);
        </layout>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QGroupBox" name="generalBox">
-       <property name="title">
-        <string>General</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_9">
-        <item row="1" column="0">
-         <widget class="QPushButton" name="toggleCameraButton">
-          <property name="text">
-           <string>Toggle Camera</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="connectButton">
-          <property name="text">
-           <string>Roll out!</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="toggleSteeringModeButton">
-          <property name="text">
-           <string>Toggle Precision</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="1" column="5">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="7" column="0">
-      <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
      <item row="1" column="4">
       <widget class="QGroupBox" name="manualThrusterBox">
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="title">
         <string>Manual Thruster Steering</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_8">
-        <item row="2" column="0">
-         <widget class="QLabel" name="motor2TextLabel_2">
-          <property name="text">
-           <string>Motor 2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="servo1TextLabel">
-          <property name="text">
-           <string>Servo 1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="servo2TextLabel">
-          <property name="text">
-           <string>Servo 2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QSlider" name="motor3Slider">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <number>-100</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="motor1TextLabel_2">
-          <property name="text">
-           <string>Motor 1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QCheckBox" name="motorTestEnabled">
-          <property name="text">
-           <string>Enabled</string>
-          </property>
-         </widget>
-        </item>
         <item row="5" column="1">
          <widget class="QSlider" name="motor5Slider">
           <property name="enabled">
@@ -1180,6 +1145,42 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="motor3TextLabel_2">
+          <property name="text">
+           <string>Motor 3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="servo2TextLabel">
+          <property name="text">
+           <string>Servo 2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="motor3Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="motor4TextLabel_2">
           <property name="text">
@@ -1187,8 +1188,59 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QSlider" name="motor2Slider">
+        <item row="1" column="0">
+         <widget class="QLabel" name="motor1TextLabel_2">
+          <property name="text">
+           <string>Motor 1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QLabel" name="motor5Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="motor1Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSlider" name="motor4Slider">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -1200,6 +1252,13 @@ background-color: rgb(203, 12, 41);
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="servo1TextLabel">
+          <property name="text">
+           <string>Servo 1</string>
           </property>
          </widget>
         </item>
@@ -1216,6 +1275,80 @@ background-color: rgb(203, 12, 41);
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QSlider" name="servo1Slider">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <number>-100</number>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="motor2TextLabel_2">
+          <property name="text">
+           <string>Motor 2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="2">
+         <widget class="QLabel" name="servo2Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="QLabel" name="motor4Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="motor5TextLabel_2">
+          <property name="text">
+           <string>Motor 5</string>
           </property>
          </widget>
         </item>
@@ -1238,8 +1371,15 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QSlider" name="servo1Slider">
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="motorTestEnabled">
+          <property name="text">
+           <string>Enabled</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSlider" name="motor3Slider">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -1254,8 +1394,8 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
-         <widget class="QSlider" name="motor4Slider">
+        <item row="2" column="1">
+         <widget class="QSlider" name="motor2Slider">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -1270,25 +1410,11 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="motor3TextLabel_2">
-          <property name="text">
-           <string>Motor 3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="motor5TextLabel_2">
-          <property name="text">
-           <string>Motor 5</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="motor1Value">
+        <item row="6" column="2">
+         <widget class="QLabel" name="servo1Value">
           <property name="minimumSize">
            <size>
-            <width>70</width>
+            <width>50</width>
             <height>0</height>
            </size>
           </property>
@@ -1310,7 +1436,7 @@ background-color: rgb(203, 12, 41);
          <widget class="QLabel" name="motor2Value">
           <property name="minimumSize">
            <size>
-            <width>70</width>
+            <width>50</width>
             <height>0</height>
            </size>
           </property>
@@ -1328,115 +1454,18 @@ background-color: rgb(203, 12, 41);
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QLabel" name="motor3Value">
-          <property name="minimumSize">
+        <item row="3" column="3">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
            <size>
-            <width>70</width>
-            <height>0</height>
+            <width>40</width>
+            <height>20</height>
            </size>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="motor4Value">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="2">
-         <widget class="QLabel" name="motor5Value">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="2">
-         <widget class="QLabel" name="servo1Value">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="2">
-         <widget class="QLabel" name="servo2Value">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
       </widget>

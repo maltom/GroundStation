@@ -1,4 +1,4 @@
-#include "tcpconnectionhandler.h"
+﻿#include "tcpconnectionhandler.h"
 #include "src/Rov_Tcp_Client_Qt/gupikmodules.h"
 #include <QDateTime>
 #include <QDebug>
@@ -197,13 +197,13 @@ void tcpConnectionHandler::on_pushButtonSetPressRate_clicked()
     }
 }
 
-void tcpConnectionHandler::on_pushButtonOpenGripper_clicked()
+void tcpConnectionHandler::sendOpenGripper()
 {
     this->addToLogs( "Open Gripper!" );
     on_pushButtonCloseGripper_SendGrippercommand( true ); // 0 - closed gripper
 }
 
-void tcpConnectionHandler::on_pushButtonCloseGripper_clicked()
+void tcpConnectionHandler::sendCloseGripper()
 {
     this->addToLogs( "Close Gripper" );
     on_pushButtonCloseGripper_SendGrippercommand( false ); // 1 - open gripper
@@ -459,14 +459,14 @@ void tcpConnectionHandler::on_pushButtonDriveForward_clicked()
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_BACKWARD ) );
 }
 
-void tcpConnectionHandler::on_pushButtonOpenJaws_clicked()
+void tcpConnectionHandler::sendOpenGulper()
 {
     this->addToLogs( "[AHRS] Open pipe robot's jaws" );
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_OPEN ) );
 }
 
-void tcpConnectionHandler::on_pushButtonCloseJaws_clicked()
+void tcpConnectionHandler::sendCloseGulper()
 {
-    this->addToLogs( "[AHRS] Clase pipe robot's jaws" );
+    this->addToLogs( "[AHRS] Close pipe robot's jaws" );
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_CLOSE ) );
 }

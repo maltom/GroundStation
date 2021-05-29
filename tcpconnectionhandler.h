@@ -32,14 +32,15 @@ public slots:
     void on_pushButtonSendMotorCommand_clicked();
 
     void openConnection();
-
     void closeConnection();
 
     void on_pushButtonGetPressure_clicked();
 
-    void on_pushButtonOpenGripper_clicked();
+    void sendOpenGripper();
+    void sendCloseGripper();
 
-    void on_pushButtonCloseGripper_clicked();
+    void sendOpenGulper();
+    void sendCloseGulper();
 
     void on_horizontalSliderServo1_valueChanged( int value );
 
@@ -82,10 +83,6 @@ public slots:
     void on_pushButtonDriveBackward_clicked();
 
     void on_pushButtonDriveForward_clicked();
-
-    void on_pushButtonOpenJaws_clicked();
-
-    void on_pushButtonCloseJaws_clicked();
 
 private:
     void addToLogs( QString message );

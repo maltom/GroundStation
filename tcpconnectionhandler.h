@@ -27,31 +27,31 @@ public slots:
     void TcpNewDisconnectionLogs();
     void TcpNewTcpReceiveLogs();
 
-    void on_pushButtonClose_clicked();
     void on_pushSendCustomCommand_clicked();
     void on_pushButtonSendMotorCommand_clicked();
 
     void openConnection();
     void closeConnection();
 
-    void on_pushButtonGetPressure_clicked();
+    void sendGetPressureRequest();
 
     void sendOpenGripper();
     void sendCloseGripper();
 
     void sendOpenGulper();
     void sendCloseGulper();
+    void sendStopGulper();
+    void sendBackwardGulper();
+    void sendForwardGulper();
 
     void on_horizontalSliderServo1_valueChanged( int value );
-
     void on_horizontalSliderServo2_valueChanged( int value );
 
+    void sendImuRate( int newRate );
+    void sendEulerRate( int newRate );
+    void sendPressureRate( int newRate );
+
     void on_pushButtonZeroGyros_clicked();
-
-    void on_pushButtonSetImuRate_clicked();
-
-    void on_pushButtonSetEulerRate_clicked();
-
     void on_pushButtonSetMagRef_clicked();
 
     void on_pushButtonResetToFactory_clicked();
@@ -64,25 +64,14 @@ public slots:
 
     void on_pushButtonReadHealth_clicked();
 
-    void on_pushButtonSetPressRate_clicked();
-
     void on_pbApplyAccMtx_clicked();
-
     void on_pbApplyMagMtx_clicked();
 
     void on_pbApplyAccBias_clicked();
-
     void on_pbApplyMagBias_clicked();
-
     void on_pbApplyGyroTrim_clicked();
 
     void on_pushButtonStopAllMotors_clicked();
-
-    void on_pushButtonStop_clicked();
-
-    void on_pushButtonDriveBackward_clicked();
-
-    void on_pushButtonDriveForward_clicked();
 
 private:
     void addToLogs( QString message );

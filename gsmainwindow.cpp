@@ -52,7 +52,7 @@ GSMainWindow::~GSMainWindow()
         ;
 
     spaceMouseThread->quit();
-    while( !videoThread->isFinished() )
+    while( !spaceMouseThread->isFinished() )
         ;
 
     drawingThread->quit();
@@ -61,6 +61,10 @@ GSMainWindow::~GSMainWindow()
 
     regulatorThread->quit();
     while( !regulatorThread->isFinished() )
+        ;
+
+    tcpComunicationThread->quit();
+    while( !tcpComunicationThread->isFinished() )
         ;
 
     delete videoThread;
@@ -134,8 +138,12 @@ void GSMainWindow::tcpHandlerStart( void )
 
     connect( this, &GSMainWindow::openGripper, connectionHandler, &tcpConnectionHandler::sendOpenGripper );
     connect( this, &GSMainWindow::closeGripper, connectionHandler, &tcpConnectionHandler::sendCloseGripper );
+
     connect( this, &GSMainWindow::openGulper, connectionHandler, &tcpConnectionHandler::sendOpenGulper );
     connect( this, &GSMainWindow::closeGulper, connectionHandler, &tcpConnectionHandler::sendCloseGulper );
+    connect( this, &GSMainWindow::forwardGulper, connectionHandler, &tcpConnectionHandler::sendForwardGulper );
+    connect( this, &GSMainWindow::backwardGulper, connectionHandler, &tcpConnectionHandler::sendBackwardGulper );
+    connect( this, &GSMainWindow::stopGulper, connectionHandler, &tcpConnectionHandler::sendStopGulper );
 }
 
 void GSMainWindow::initializeTcpConnection( void )
@@ -163,8 +171,12 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->closeButton, &QPushButton::released, this, &GSMainWindow::parseCloseGripper );
     connect( ui->clenchButton, &QPushButton::released, this, &GSMainWindow::parseClenchGripper );
     connect( ui->stretchButton, &QPushButton::released, this, &GSMainWindow::parseStretchGripper );
+
     connect( ui->openGulperButton, &QPushButton::released, this, &GSMainWindow::parseOpenGulper );
     connect( ui->closeGulperButton, &QPushButton::released, this, &GSMainWindow::parseCloseGulper );
+    connect( ui->forwardButton, &QPushButton::released, this, &GSMainWindow::parseForwardGulper );
+    connect( ui->backwardButton, &QPushButton::released, this, &GSMainWindow::parseBackwardGulper );
+    connect( ui->stopButton, &QPushButton::released, this, &GSMainWindow::parseStopGulper );
 }
 void GSMainWindow::drawingStart()
 {
@@ -427,4 +439,16 @@ void GSMainWindow::parseOpenGulper()
 void GSMainWindow::parseCloseGulper()
 {
     emit closeGulper();
+}
+void GSMainWindow::parseStopGulper()
+{
+    emit stopGulper();
+}
+void GSMainWindow::parseBackwardGulper()
+{
+    emit backwardGulper();
+}
+void GSMainWindow::parseForwardGulper()
+{
+    emit forwardGulper();
 }

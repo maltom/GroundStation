@@ -79,14 +79,6 @@ void tcpConnectionHandler::TcpNewTcpReceiveLogs()
     }
 }
 
-void tcpConnectionHandler::on_pushButtonClose_clicked()
-{
-    // before close free used memory, close all connections...
-    this->addToLogs( "Closing..." );
-    rov_tcp_client.TcpClient_Disconnect();
-    close();
-}
-
 void tcpConnectionHandler::addToLogs( QString message )
 {
     QString currentDateTime = QDateTime::currentDateTime().toString( "yyyy.MM.dd hh:mm:ss" );
@@ -179,14 +171,14 @@ void tcpConnectionHandler::closeConnection()
     rov_tcp_client.TcpClient_Disconnect();
 }
 
-void tcpConnectionHandler::on_pushButtonGetPressure_clicked()
+void tcpConnectionHandler::sendGetPressureRequest()
 {
     QByteArray msg = press.Pressure_CreateControlMessage( GET_ACTUAL_PRESSURE, 0 );
     this->addToLogs( "[Pressure] Get pressure!" );
     rov_tcp_client.TcpClient_Transmit( msg );
 }
 
-void tcpConnectionHandler::on_pushButtonSetPressRate_clicked()
+void tcpConnectionHandler::sendPressureRate( int newRate )
 {
     int press_rate = ui->lineEditPressRate->text().toUInt(); // ui->lineEdit
     if( press_rate >= 0 && press_rate <= 10 )
@@ -257,7 +249,7 @@ void tcpConnectionHandler::on_pushButtonZeroGyros_clicked()
     rov_tcp_client.TcpClient_Transmit( ahrs_config_message );
 }
 
-void tcpConnectionHandler::on_pushButtonSetImuRate_clicked()
+void tcpConnectionHandler::sendImuRate( int newRate )
 {
     quint32 rate = ui->leImuRate->text().toInt();
     if( rate > 10 )
@@ -271,7 +263,7 @@ void tcpConnectionHandler::on_pushButtonSetImuRate_clicked()
     rov_tcp_client.TcpClient_Transmit( ahrs_config_message );
 }
 
-void tcpConnectionHandler::on_pushButtonSetEulerRate_clicked()
+void tcpConnectionHandler::sendEulerRate( int newRate )
 {
     quint32 rate = ui->leEulerRate->text().toInt();
     if( rate > 10 )
@@ -441,19 +433,19 @@ void tcpConnectionHandler::on_pushButtonStopAllMotors_clicked()
     rov_tcp_client.TcpClient_Transmit( motor_control_message );
 }
 
-void tcpConnectionHandler::on_pushButtonStop_clicked()
+void tcpConnectionHandler::sendStopGulper()
 {
     this->addToLogs( "[AHRS] Stop pipe robot" );
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_STOP ) );
 }
 
-void tcpConnectionHandler::on_pushButtonDriveBackward_clicked()
+void tcpConnectionHandler::sendBackwardGulper()
 {
     this->addToLogs( "[AHRS] Move pipe robot forward" );
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_FORWARD ) );
 }
 
-void tcpConnectionHandler::on_pushButtonDriveForward_clicked()
+void tcpConnectionHandler::sendForwardGulper()
 {
     this->addToLogs( "[AHRS] Move pipe robot backward" );
     rov_tcp_client.TcpClient_Transmit( lykacz.sendCommand( LYKACZ_BACKWARD ) );

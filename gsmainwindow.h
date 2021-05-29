@@ -37,8 +37,10 @@ private:
 
     // Technical Values
     const int numberOfCams{ 2 };
-    static constexpr int regulatorTickTime{ 10 };
-    int x3{ 5 };
+    static constexpr int regulatorTickTime{ 10 };       // ms
+    static constexpr int pressureSensorFrequency{ 10 }; // Hz
+    static constexpr int imuFrequency{ 10 };            // Hz
+
     // Modes
     int steeringMode{ 0 }; // fast = 0, precise = 1
     int cameraChosen{ 0 }; // frontal camera = 0, downward camera = 0
@@ -77,6 +79,9 @@ private slots:
     void parseStretchGripper();
     void parseOpenGulper();
     void parseCloseGulper();
+    void parseStopGulper();
+    void parseBackwardGulper();
+    void parseForwardGulper();
 
 public:
     GSMainWindow( QWidget* parent = nullptr );
@@ -122,12 +127,15 @@ signals:
     void closeConnection();
     void openGripper();
     void closeGripper();
-    // close completely
+    // close completely - maybe useless
     void clenchGripper();
-    // open completely
+    // open completely - maybe useless
     void stretchGripper();
     void openGulper();
     void closeGulper();
+    void stopGulper();
+    void backwardGulper();
+    void forwardGulper();
 
     void sendDrawingPositions( double x11, double y11, double x21, double y21 );
 

@@ -16,9 +16,9 @@ DEFINES += QT_DEPRECATED_WARNINGS CT_USE_LAPACK
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    communicaton.cpp \
     drawing.cpp \
     EigenQP.cpp \
+    jsonxx/jsonxx.cc \
     lqrhandler.cpp \
     main.cpp \
     gsmainwindow.cpp \
@@ -37,10 +37,10 @@ SOURCES += \
     videoprocess.cpp
 
 HEADERS += \
-    communicaton.h \
     drawing.h \
     EigenQP.h \
     gsmainwindow.h \
+    jsonxx/jsonxx.h \
     lqrhandler.h \
     positiondata.h \
     ROV.h \

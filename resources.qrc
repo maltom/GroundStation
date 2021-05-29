@@ -3,4 +3,7 @@
         <file>resources/images/look.png</file>
         <file>resources/images/oneYearPrior.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>resources/config/ipAdresses.json</file>
+    </qresource>
 </RCC>

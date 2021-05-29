@@ -7,7 +7,7 @@
 #include "lqrhandler.h"
 #include "positiondata.h"
 #include "drawing.h"
-#include "sqlhandler.h"
+#include "tcpconnectionhandler.h"
 
 #include <QTimer>
 #include <chrono>
@@ -22,7 +22,6 @@ GSMainWindow::GSMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     qRegisterMetaType< Eigen::VectorXd >( "VectorXd" );
     qRegisterMetaType< Eigen::Vector3d >( "Vector3d" );
     qRegisterMetaType< Matrix612 >( "Matrix126" );
-    qRegisterMetaType< sensor_msgs::Image >( "ROSImage" );
 
     ui->setupUi( this );
 
@@ -68,6 +67,7 @@ GSMainWindow::~GSMainWindow()
     delete spaceMouseThread;
     delete drawingThread;
     delete regulatorThread;
+    delete tcpComunicationThread;
     delete ui;
 }
 
@@ -131,6 +131,22 @@ void GSMainWindow::spaceMouseStart()
     spaceMouseThread->start();
 }
 
+void GSMainWindow::tcpHandlerStart( void )
+{
+    tcpComunicationThread = new QThread();
+    connectionHandler     = new tcpConnectionHandler();
+
+    connectionHandler->moveToThread( tcpComunicationThread );
+
+    connect( this, &GSMainWindow::openConnection, connectionHandler, &tcpConnectionHandler::openConnection );
+    connect( this, &GSMainWindow::closeConnection, connectionHandler, &tcpConnectionHandler::closeConnection );
+}
+
+void GSMainWindow::initializeTcpConnection( void )
+{
+    tcpComunicationThread = new QThread();
+}
+
 void GSMainWindow::modeButtonsInitialization( void )
 {
     connect( ui->toggleCameraButton, SIGNAL( released() ), SLOT( changeCamera() ) );
@@ -144,6 +160,8 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->motor5Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
     connect( ui->servo1Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
     connect( ui->servo2Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
+
+    connect( ui->connectButton, SIGNAL( released() ), this, SLOT( toggleConnection() ) );
 }
 void GSMainWindow::drawingStart()
 {
@@ -287,6 +305,15 @@ void GSMainWindow::receiveCameraStatus( int status )
         ui->cameraStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
 }
 
+void GSMainWindow::receiveConnectionStatus( int status )
+{
+
+    if( status )
+        ui->connectionStatusLabel->setStyleSheet( ( "QLabel { background-color : darkGreen;}" ) );
+    else
+        ui->connectionStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
+}
+
 void GSMainWindow::changeCamera( void )
 {
     ++cameraChosen;
@@ -354,4 +381,16 @@ void GSMainWindow::mouseMoveEvent( QMouseEvent* event )
 void GSMainWindow::drawFirstGraphics( void )
 {
     ui->orientationLabel->setPixmap( QPixmap::fromImage( QImage( ":/images/resources/images/look.png" ) ) );
+}
+
+void GSMainWindow::toggleConnection( void )
+{
+    if( connectionStatus == 1 )
+    {
+        emit openConnection();
+    }
+    else
+    {
+        emit closeConnection();
+    }
 }

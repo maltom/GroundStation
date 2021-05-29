@@ -1,14 +1,11 @@
 #include "tcpclientsocket.h"
-#include "mainwindow.h"
 #include <QDebug>
 #include <QHostAddress>
 
-#define BASIC_STR(x) #x
-#define STR(x) BASIC_STR(x)
+#define BASIC_STR( x ) #x
+#define STR( x ) BASIC_STR( x )
 
-TcpClientSocket::TcpClientSocket(QObject *parent) : QObject(parent)
-{
-}
+TcpClientSocket::TcpClientSocket( QObject* parent ) : QObject( parent ) {}
 
 QByteArray TcpClientSocket::TcpClientConnect_GetAllReceivedData()
 {
@@ -18,34 +15,36 @@ QByteArray TcpClientSocket::TcpClientConnect_GetAllReceivedData()
 
 QString TcpClientSocket::TcpClientConnect_GetAddressAndPort()
 {
-    QString addr_port = ("TCP address: " + QString::fromStdString(ADDRESS) + " port: " + QString::number(PORT));
+    QString addr_port = ( "TCP address: " + QString::fromStdString( ADDRESS ) + " port: " + QString::number( PORT ) );
     return addr_port;
 }
 
-QTcpSocket * TcpClientSocket::TcpClientConnect_GetSocket()
+QTcpSocket* TcpClientSocket::TcpClientConnect_GetSocket()
 {
     return &socket;
 }
 
-bool TcpClientSocket::TcpClient_Connect(){
+bool TcpClientSocket::TcpClient_Connect()
+{
 
-    socket.connectToHost(QHostAddress(ADDRESS), PORT);
+    socket.connectToHost( QHostAddress( ADDRESS ), PORT );
 
-    if(!socket.waitForConnected(5000)){
+    if( !socket.waitForConnected( 5000 ) )
+    {
         qDebug() << socket.errorString();
         return false;
     }
     return true;
 }
 
-void TcpClientSocket::TcpClient_Disconnect(){
+void TcpClientSocket::TcpClient_Disconnect()
+{
 
     socket.close();
-
 }
 
-void TcpClientSocket::TcpClient_Transmit(QByteArray bytes){
+void TcpClientSocket::TcpClient_Transmit( QByteArray bytes )
+{
 
-    socket.write(bytes);
-
+    socket.write( bytes );
 }

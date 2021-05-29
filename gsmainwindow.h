@@ -17,6 +17,7 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 class LQRHandler;
+class tcpConnectionHandler;
 
 class GSMainWindow : public QMainWindow
 {
@@ -25,29 +26,35 @@ class GSMainWindow : public QMainWindow
 private:
     Ui::GSMainWindow* ui;
     // Threads
-    QThread* videoThread      = nullptr;
-    QThread* spaceMouseThread = nullptr;
-    QThread* drawingThread    = nullptr;
-    QThread* regulatorThread  = nullptr;
-    LQRHandler* regulator     = nullptr;
+    QThread* videoThread           = nullptr;
+    QThread* spaceMouseThread      = nullptr;
+    QThread* drawingThread         = nullptr;
+    QThread* regulatorThread       = nullptr;
+    QThread* tcpComunicationThread = nullptr;
+
+    LQRHandler* regulator                   = nullptr;
+    tcpConnectionHandler* connectionHandler = nullptr;
 
     // Technical Values
-    const int numberOfCams                 = 2;
-    static constexpr int regulatorTickTime = 10;
-    int x3                                 = 5;
+    const int numberOfCams{ 2 };
+    static constexpr int regulatorTickTime{ 10 };
+    int x3{ 5 };
     // Modes
-    int steeringMode             = 0; // fast = 0, precise = 1
-    int cameraChosen             = 0; // frontal camera = 0, downward camera = 0
-    int testMode                 = 0; // test Mode for sending custom PWM values
-    unsigned int coralProcessing = 0u;
+    int steeringMode{ 0 }; // fast = 0, precise = 1
+    int cameraChosen{ 0 }; // frontal camera = 0, downward camera = 0
+    int testMode{ 0 };     // test Mode for sending custom PWM values
+    unsigned int coralProcessing{ 0u };
     // positionData
     positionData spaceMousePositionData; // only current is in use
     positionData deviationPositionData;  // only current is in use
     positionData rovPosition; // past - previous timestep, current - present time step (from STM), future - set position
 
+    int connectionStatus{ 0 };
+
     // Startup functions
     void videoStart( void );
     void spaceMouseStart( void );
+    void tcpHandlerStart( void );
     void modeButtonsInitialization( void );
     void drawingStart( void );
     void regulatorStart( void );
@@ -56,8 +63,11 @@ private:
     void calculateDeviation( void );
     // initial graphics
     void drawFirstGraphics( void );
+    void initializeTcpConnection( void );
     // mouse events
     void mouseMoveEvent( QMouseEvent* event );
+    // connection
+    void toggleConnection( void );
 
 public:
     GSMainWindow( QWidget* parent = nullptr );
@@ -71,8 +81,9 @@ public slots:
                              int roll,
                              int pitch,
                              int yaw );
-    void receiveSpaceStatus( int status );  // status of space mouse
-    void receiveCameraStatus( int status ); // status of camera
+    void receiveSpaceStatus( int status );      // status of space mouse
+    void receiveCameraStatus( int status );     // status of camera
+    void receiveConnectionStatus( int status ); // status of connection
     void receiveOrientationDrawing( QImage drawing );
 
     void changeCamera( void );
@@ -95,10 +106,16 @@ signals:
     void goCalculateDeviation();
     void goPrintSetTargetPosition();
     void goPrintDeviation();
+
     void sendCoralProcessingOnOff( unsigned int );
     void sendVideoSetup( int device );
+    void openConnection();
+    void closeConnection();
+
     void sendDrawingPositions( double x11, double y11, double x21, double y21 );
+
     void sendTrackBallPosition( Eigen::Vector3d );
+    void sendConnectionStartRequest( void );
 
     // void
 };

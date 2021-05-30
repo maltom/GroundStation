@@ -451,3 +451,8 @@ void GSMainWindow::parseForwardGulper()
 {
     emit forwardGulper();
 }
+
+void GSMainWindow::receivePressureData( int value )
+{
+    ui->pressureValueValue->setText( QString::number( value ) );
+}

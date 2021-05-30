@@ -65,7 +65,6 @@ private:
     void calculateDeviation( void );
     // initial graphics
     void drawFirstGraphics( void );
-    void initializeTcpConnection( void );
     // mouse events
     void mouseMoveEvent( QMouseEvent* event );
 private slots:

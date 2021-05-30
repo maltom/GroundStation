@@ -150,11 +150,6 @@ void GSMainWindow::tcpHandlerStart( void )
     connect( this, &GSMainWindow::setImuRate, connectionHandler, &tcpConnectionHandler::sendImuRate );
 }
 
-void GSMainWindow::initializeTcpConnection( void )
-{
-    tcpComunicationThread = new QThread();
-}
-
 void GSMainWindow::modeButtonsInitialization( void )
 {
     connect( ui->toggleCameraButton, SIGNAL( released() ), SLOT( changeCamera() ) );

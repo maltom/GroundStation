@@ -71,6 +71,7 @@ private:
 public slots:
     void receiveK( Matrix612 K );
     void update();
+    void receiveDesiredForces(double x, double y, double z, double roll, double pitch, double yaw);
 signals:
     void positionReady( VectorXd position, VectorXd thrusterAzimuth );
     void timePositionReady( double timeElapsed, VectorXd position, VectorXd thrusterAzimuth );

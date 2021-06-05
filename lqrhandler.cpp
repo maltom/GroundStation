@@ -75,17 +75,23 @@ void LQRHandler::calculateRegulatorFeedbackPose()
     //    std::cout <<"Sprzenzenie:"<< regulatorFeedbackPosition<<std::endl;
 }
 
+void LQRHandler::receiveDesiredForces(double x, double y, double z, double roll, double pitch, double yaw) {
+    this->error << x, y,z,roll,pitch,yaw;
+}
+
 void LQRHandler::calculateError()
 {
 
-    this->error = this->rov.getNbar( A, B, K ) * this->desiredPosition + this->regulatorFeedbackPosition;
+    //this->error = this->rov.getNbar( A, B, K ) * this->desiredPosition + this->regulatorFeedbackPosition;
+    //this->error = SPACEMOUSE.coordinates()
+    this->error = this->error / 2.5;
 
     for( int i = 0; i < 6; ++i )
     {
-        if( error( i ) > 40 )
-            error( i ) = 40;
-        else if( error( i ) < -40 )
-            error( i ) = -40;
+        if( error( i ) > 40.0 )
+            error( i ) = 40.0;
+        else if( error( i ) < -40.0 )
+            error( i ) = -40.0;
     }
     // std::cout <<"Uhyp:"<< error<<std::endl;
 }
@@ -103,7 +109,7 @@ void LQRHandler::update()
 
     calculateRegulatorFeedbackPose();
     calculateError();
-    this->rov.thrust_allocation( error );
+    this->rov.thrust_allocation( error ); //[Fx, Fy, Fz, Mr, Mp, My]
     this->simulationResultState
         = /*actualState +*/ this->rov.getFutureState( this->actualState, this->A, this->B, deltaT );
 

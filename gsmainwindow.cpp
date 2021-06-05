@@ -201,6 +201,7 @@ void GSMainWindow::regulatorStart()
 
     connect( regulatorTimer, &QTimer::timeout, regulator, &LQRHandler::update );
     connect( regulator, &LQRHandler::positionReady, this, &GSMainWindow::printCurrentPosition );
+    connect( this, &GSMainWindow::sendDesiredForcesToLQR, regulator, &LQRHandler::receiveDesiredForces );
     regulatorTimer->start();
     regulator->moveToThread( regulatorThread );
     regulatorTimer->moveToThread( regulatorThread );
@@ -228,6 +229,8 @@ void GSMainWindow::receiveCoordinates( int x, int y, int z, int roll, int pitch,
     spaceMousePositionData.recalculateSpaceMousePosition(); // normalizing <-350,350> to <-100,100>
     emit goPrintSpaceMouseCoordinates();
     emit goSetTargetPosition();
+    auto forces = spaceMousePositionData.getPositionAndVelocity("current", "position");
+    emit sendDesiredForcesToLQR(forces[0], forces[1], forces[2], forces[3], forces[4], forces[5]);
 }
 void GSMainWindow::setTargetPosition( void )
 {

@@ -150,6 +150,7 @@ signals:
     void sendTrackBallPosition( Eigen::Vector3d );
     void sendConnectionStartRequest( void );
 
+    void sendDesiredForcesToLQR(double x,double y,double z,double roll,double pitch,double yaw);
     // void
 };
 #endif // GSMAINWINDOW_H

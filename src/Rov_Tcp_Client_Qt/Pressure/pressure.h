@@ -15,20 +15,20 @@ typedef enum
 class pressure
 {
 private:
-    QByteArray pressure_CreateGetPressureMessage(void);
-    QByteArray pressure_CreateSetPressurePeriodMessage(int press_rate);
+    QByteArray pressure_CreateGetPressureMessage( void );
+    QByteArray pressure_CreateSetPressurePeriodMessage( int press_rate );
 
 public:
     pressure();
 
-    QByteArray Pressure_CreateControlMessage(task_pressure_sensor_command_t cmd_id, int press_rate);
+    QByteArray Pressure_CreateControlMessage( task_pressure_sensor_command_t cmd_id, int press_rate );
 
     /*!
      * \brief From presssure module we can only receive pressure!!!
      * \param message
      * \return pressure
      */
-    float Pressure_ParseReceivedMessage(QByteArray received_data);
+    float Pressure_ParseReceivedMessage( QByteArray received_data );
 };
 
 #endif // PRESSURE_H

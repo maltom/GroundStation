@@ -14,6 +14,7 @@ class tcpConnectionHandler : public QObject
 public:
     explicit tcpConnectionHandler( QObject* parent = nullptr );
 
+private:
     TcpClientSocket rov_tcp_client;
 
     AhrsConfigure ahrs_config;
@@ -23,7 +24,10 @@ public:
 
     // tcp connection status slots
 public slots:
-    void TcpNewTcpReceiveLogs();
+
+    void connectionSuccesfull();
+    void connectionFailed();
+    //    void TcpNewTcpReceiveLogs();
 
     //    void on_pushSendCustomCommand_clicked();
     //    void on_pushButtonSendMotorCommand_clicked();
@@ -70,10 +74,12 @@ public slots:
     //    void on_pbApplyGyroTrim_clicked();
 
     //    void on_pushButtonStopAllMotors_clicked();
+signals:
+    void sendConnectionStatus( unsigned status );
 
 private:
     void on_horizontalSliderServo_SendServoValue( int servo_number, int servo_value );
-    void on_pushButtonCloseGripper_SendGrippercommand( bool open );
+    void sendGripperCommand( bool open );
 
     void floatToBytes( float in, quint8* out );
 };

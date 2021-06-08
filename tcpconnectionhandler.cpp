@@ -8,15 +8,20 @@
 
 tcpConnectionHandler::tcpConnectionHandler( QObject* parent )
 {
-
-    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( connected() ), this, SLOT( TcpNewConnectionLogs() ) );
-    connect( rov_tcp_client.TcpClientConnect_GetSocket(),
-             SIGNAL( disconnected() ),
-             this,
-             SLOT( TcpNewDisconnectionLogs() ) );
-    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( readyRead() ), this, SLOT( TcpNewTcpReceiveLogs() ) );
+    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( connected() ), this, SLOT( connectionSuccesfull() ) );
+    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( disconnected() ), this, SLOT( connectionFailed() ) );
+    //	    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( readyRead() ), this, SLOT(
+    //	    TcpNewTcpReceiveLogs() ) );
 }
 
+void tcpConnectionHandler::connectionSuccesfull()
+{
+    emit sendConnectionStatus( 1 );
+}
+void tcpConnectionHandler::connectionFailed()
+{
+    emit sendConnectionStatus( 0 );
+}
 /* motor control message id */
 typedef enum
 {
@@ -34,37 +39,37 @@ static QString mainwindow_QVarLengthArrayToQString( QVarLengthArray< qint8 > mes
     return message_string;
 }
 
-void tcpConnectionHandler::TcpNewTcpReceiveLogs()
-{
-    QString log;
-    QByteArray received_data = rov_tcp_client.TcpClientConnect_GetAllReceivedData();
-    //    QString received_data_log = "Data received: " + received_data.toStdString();
-    //    this->addToLogs(received_data_log);
+// void tcpConnectionHandler::TcpNewTcpReceiveLogs()
+//{
+//    QString log;
+//    QByteArray received_data = rov_tcp_client.TcpClientConnect_GetAllReceivedData();
+//    //    QString received_data_log = "Data received: " + received_data.toStdString();
+//    //    this->addToLogs(received_data_log);
 
-    int module_id = static_cast< int >( received_data[ 0 ] );
+//    int module_id = static_cast< int >( received_data[ 0 ] );
 
-    switch( module_id )
-    {
-    case PRESSURE_SENSOR_MODULE_ID:
-    {
-        float pressure = press.Pressure_ParseReceivedMessage( received_data );
-        log            = "Pressure: " + ( QString::number( pressure ) );
-    }
-    break;
+//    switch( module_id )
+//    {
+//    case PRESSURE_SENSOR_MODULE_ID:
+//    {
+//        float pressure = press.Pressure_ParseReceivedMessage( received_data );
+//        log            = "Pressure: " + ( QString::number( pressure ) );
+//    }
+//    break;
 
-    case AHRS_DATA_ID:
-    {
-        // this->addToLogs("Received ahrs data!!!");
-        // dalsze parsowanie received danych, na podstawie ahrs data id
-    }
-    break;
+//    case AHRS_DATA_ID:
+//    {
+//        // this->addToLogs("Received ahrs data!!!");
+//        // dalsze parsowanie received danych, na podstawie ahrs data id
+//    }
+//    break;
 
-    default:
-    {
-    }
-    break;
-    }
-}
+//    default:
+//    {
+//    }
+//    break;
+//    }
+//}
 
 // void tcpConnectionHandler::on_pushSendCustomCommand_clicked()
 //{
@@ -167,15 +172,15 @@ void tcpConnectionHandler::sendPressureRate( int newRate )
 
 void tcpConnectionHandler::sendOpenGripper()
 {
-    on_pushButtonCloseGripper_SendGrippercommand( true ); // 0 - closed gripper
+    sendGripperCommand( true ); // 0 - closed gripper
 }
 
 void tcpConnectionHandler::sendCloseGripper()
 {
-    on_pushButtonCloseGripper_SendGrippercommand( false ); // 1 - open gripper
+    sendGripperCommand( false ); // 1 - open gripper
 }
 
-void tcpConnectionHandler::on_pushButtonCloseGripper_SendGrippercommand( bool open )
+void tcpConnectionHandler::sendGripperCommand( bool open )
 {
     QVarLengthArray< qint8 > message_array;
     message_array.append( GRIPPER_MODULE_ID );

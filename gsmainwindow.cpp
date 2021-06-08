@@ -34,7 +34,7 @@ GSMainWindow::GSMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     drawingStart();
 
     regulatorStart();
-
+    tcpHandlerStart();
     // centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking( true );
 
@@ -132,9 +132,12 @@ void GSMainWindow::tcpHandlerStart( void )
     connectionHandler     = new tcpConnectionHandler();
 
     connectionHandler->moveToThread( tcpComunicationThread );
+    tcpComunicationThread->start();
 
     connect( this, &GSMainWindow::openConnection, connectionHandler, &tcpConnectionHandler::openConnection );
     connect( this, &GSMainWindow::closeConnection, connectionHandler, &tcpConnectionHandler::closeConnection );
+    connect(
+        connectionHandler, &tcpConnectionHandler::sendConnectionStatus, this, &GSMainWindow::receiveConnectionStatus );
 
     connect( this, &GSMainWindow::openGripper, connectionHandler, &tcpConnectionHandler::sendOpenGripper );
     connect( this, &GSMainWindow::closeGripper, connectionHandler, &tcpConnectionHandler::sendCloseGripper );
@@ -164,12 +167,12 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->servo1Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
     connect( ui->servo2Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
 
-    connect( ui->connectButton, &QPushButton::released, this, &GSMainWindow::toggleConnection );
+    connect( ui->connectButton, SIGNAL( released() ), this, SLOT( toggleConnection() ) );
 
-    connect( ui->openButton, &QPushButton::released, this, &GSMainWindow::parseOpenGripper );
-    connect( ui->closeButton, &QPushButton::released, this, &GSMainWindow::parseCloseGripper );
-    connect( ui->clenchButton, &QPushButton::released, this, &GSMainWindow::parseClenchGripper );
-    connect( ui->stretchButton, &QPushButton::released, this, &GSMainWindow::parseStretchGripper );
+    connect( ui->openButton, SIGNAL( released() ), this, SLOT( parseOpenGripper() ) );
+    connect( ui->closeButton, SIGNAL( released() ), this, SLOT( parseCloseGripper() ) );
+    connect( ui->clenchButton, SIGNAL( released() ), this, SLOT( parseClenchGripper() ) );
+    connect( ui->stretchButton, SIGNAL( released() ), this, SLOT( parseStretchGripper() ) );
 
     connect( ui->openGulperButton, &QPushButton::released, this, &GSMainWindow::parseOpenGulper );
     connect( ui->closeGulperButton, &QPushButton::released, this, &GSMainWindow::parseCloseGulper );
@@ -229,8 +232,8 @@ void GSMainWindow::receiveCoordinates( int x, int y, int z, int roll, int pitch,
     spaceMousePositionData.recalculateSpaceMousePosition(); // normalizing <-350,350> to <-100,100>
     emit goPrintSpaceMouseCoordinates();
     emit goSetTargetPosition();
-    auto forces = spaceMousePositionData.getPositionAndVelocity("current", "position");
-    emit sendDesiredForcesToLQR(forces[0], forces[1], forces[2], forces[3], forces[4], forces[5]);
+    auto forces = spaceMousePositionData.getPositionAndVelocity( "current", "position" );
+    emit sendDesiredForcesToLQR( forces[ 0 ], forces[ 1 ], forces[ 2 ], forces[ 3 ], forces[ 4 ], forces[ 5 ] );
 }
 void GSMainWindow::setTargetPosition( void )
 {
@@ -322,7 +325,7 @@ void GSMainWindow::receiveCameraStatus( int status )
         ui->cameraStatusLabel->setStyleSheet( ( "QLabel { background-color : darkRed;}" ) );
 }
 
-void GSMainWindow::receiveConnectionStatus( int status )
+void GSMainWindow::receiveConnectionStatus( unsigned status )
 {
     connectionStatus = status;
     if( status == 1 )
@@ -408,7 +411,8 @@ void GSMainWindow::drawFirstGraphics( void )
 
 void GSMainWindow::toggleConnection()
 {
-    if( connectionStatus == 1 )
+
+    if( connectionStatus == 0 )
     {
         emit openConnection();
     }

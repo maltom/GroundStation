@@ -97,9 +97,9 @@ public slots:
                              int roll,
                              int pitch,
                              int yaw );
-    void receiveSpaceStatus( int status );      // status of space mouse
-    void receiveCameraStatus( int status );     // status of camera
-    void receiveConnectionStatus( int status ); // status of connection
+    void receiveSpaceStatus( int status );           // status of space mouse
+    void receiveCameraStatus( int status );          // status of camera
+    void receiveConnectionStatus( unsigned status ); // status of connection
     void receiveOrientationDrawing( QImage drawing );
 
     void receivePressureData( int value );
@@ -150,7 +150,7 @@ signals:
     void sendTrackBallPosition( Eigen::Vector3d );
     void sendConnectionStartRequest( void );
 
-    void sendDesiredForcesToLQR(double x,double y,double z,double roll,double pitch,double yaw);
+    void sendDesiredForcesToLQR( double x, double y, double z, double roll, double pitch, double yaw );
     // void
 };
 #endif // GSMAINWINDOW_H

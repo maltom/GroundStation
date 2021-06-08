@@ -8,7 +8,7 @@
 #include <string>
 #include <QString>
 
-#define ADDRESS "169.254.0.20"
+#define ADDRESS "169.254.69.69"
 #define PORT 4242
 
 class TcpClientSocket : public QObject

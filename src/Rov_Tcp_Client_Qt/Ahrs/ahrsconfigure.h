@@ -30,17 +30,17 @@ typedef enum
 class AhrsConfigure
 {
 private:
-    QByteArray ahrsConfigure_CreateAhrsCommand(ahrs_config_command_type cmd_type_id);
-    QByteArray ahrsConfigure_InvokeReadRegister(ahrs_config_command_type cmd_type_id);
-    QByteArray ahrsConfigure_SetSensorRate(ahrs_config_command_type cmd_type_id, quint8 rate);
-    QByteArray ahrsConfigure_SetMatrix(ahrs_config_command_type cmd_type_id, quint8 *data);
-    QByteArray ahrsConfigure_SetBiasTrim(ahrs_config_command_type cmd_type_id, quint8 *data);
+    QByteArray ahrsConfigure_CreateAhrsCommand( ahrs_config_command_type cmd_type_id );
+    QByteArray ahrsConfigure_InvokeReadRegister( ahrs_config_command_type cmd_type_id );
+    QByteArray ahrsConfigure_SetSensorRate( ahrs_config_command_type cmd_type_id, quint8 rate );
+    QByteArray ahrsConfigure_SetMatrix( ahrs_config_command_type cmd_type_id, quint8* data );
+    QByteArray ahrsConfigure_SetBiasTrim( ahrs_config_command_type cmd_type_id, quint8* data );
 
 public:
     AhrsConfigure();
 
-    QByteArray AhrsConfigure_SendConfigurationMassage(ahrs_config_command_type cmd_type_id);
-    QByteArray AhrsConfigure_SendConfigurationMassageWithData(ahrs_config_command_type cmd_type_id, quint8 *data);
+    QByteArray AhrsConfigure_SendConfigurationMassage( ahrs_config_command_type cmd_type_id );
+    QByteArray AhrsConfigure_SendConfigurationMassageWithData( ahrs_config_command_type cmd_type_id, quint8* data );
 };
 
 #endif // AHRSCONFIGURE_H

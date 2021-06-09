@@ -152,6 +152,8 @@ void GSMainWindow::tcpHandlerStart( void )
 
     connect(
         this, &GSMainWindow::sendMotorTorqueToController, connectionHandler, &tcpConnectionHandler::sendMotorCommand );
+    connect(
+        this, &GSMainWindow::sendServoAngleToController, connectionHandler, &tcpConnectionHandler::sendServoCommand );
 
     connect( this,
              &GSMainWindow::sendStopAllMotorsToController,
@@ -185,6 +187,7 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->servo2Slider, &QSlider::valueChanged, this, &GSMainWindow::updateServo2PWMValues );
 
     connect( this, &GSMainWindow::passMotorValues, this, &GSMainWindow::sendSingleMotorPWMValue );
+    connect( this, &GSMainWindow::passServoValues, this, &GSMainWindow::sendSingleServoAngleValue );
 
     connect( ui->connectButton, SIGNAL( released() ), this, SLOT( toggleConnection() ) );
 
@@ -472,6 +475,23 @@ void GSMainWindow::sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqu
     }
     emit sendMotorTorqueToController( motorNumber, torqueValue );
 }
+
+void GSMainWindow::sendSingleServoAngleValue( unsigned servoNumber, unsigned angleValue )
+{
+    switch( servoNumber )
+    {
+    case 1u:
+        ui->servo1Value->setText( QString::number( angleValue ) );
+        break;
+    case 2u:
+        ui->servo2Value->setText( QString::number( angleValue ) );
+        break;
+    default:
+        break;
+    }
+    emit sendServoAngleToController( servoNumber, angleValue );
+}
+
 void GSMainWindow::mouseMoveEvent( QMouseEvent* event )
 {
 

@@ -146,6 +146,17 @@ void tcpConnectionHandler::sendToAllMotorsCommand( std::vector< unsigned > motor
     }
 }
 
+void tcpConnectionHandler::sendToAllServosCommand( std::vector< unsigned > servoAngles )
+{
+    if( servoAngles.size() != 2 )
+        throw "Number of servos wrong!";
+    else
+    {
+        for( auto i = 0u; i < 2; ++i )
+            sendServoCommand( i + 1, servoAngles[ i ] );
+    }
+}
+
 void tcpConnectionHandler::openConnection()
 {
     rov_tcp_client.TcpClient_Connect();
@@ -204,23 +215,21 @@ void tcpConnectionHandler::sendGripperCommand( bool open )
 //    on_horizontalSliderServo_SendServoValue( 2, value );
 //}
 
-// void tcpConnectionHandler::on_horizontalSliderServo_SendServoValue( int servo_number, int servo_value )
-//{
-//    if( servo_value % 10 == 0 && servo_value > 0 && servo_value < 100 )
-//    {
-//        QString log = "Value servo" + QString::number( servo_number ) + " : " + QString::number( servo_value );
+void tcpConnectionHandler::sendServoCommand( unsigned servoNumber, unsigned servoValue )
+{
+    if( servoValue % 10 == 0 && servoValue > 0 && servoValue < 100 )
+    {
+        QVarLengthArray< qint8 > message_array;
+        message_array.append( SERVO_MODULE_ID );
+        message_array.append( 2 );           // payload size
+        message_array.append( servoNumber ); // servo number
+        message_array.append( servoValue );  // servo value - 0 neutral, 10 min, 90 max
 
-//        QVarLengthArray< qint8 > message_array;
-//        message_array.append( SERVO_MODULE_ID );
-//        message_array.append( 2 );            // payload size
-//        message_array.append( servo_number ); // servo number
-//        message_array.append( servo_value );  // servo value - 0 neutral, 10 min, 90 max
+        QString message_string = mainwindow_QVarLengthArrayToQString( message_array );
 
-//        QString message_string = mainwindow_QVarLengthArrayToQString( message_array );
-
-//        rov_tcp_client.TcpClient_Transmit( message_string.toUtf8() );
-//    }
-//}
+        rov_tcp_client.TcpClient_Transmit( message_string.toUtf8() );
+    }
+}
 
 // void tcpConnectionHandler::on_pushButtonZeroGyros_clicked()
 //{

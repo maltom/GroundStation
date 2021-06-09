@@ -43,6 +43,8 @@ private:
     static constexpr int motorMaxValue{ 2000 };
     static constexpr int motorMinValue{ 0 };
     static constexpr int motorNeutralValue{ 1000 };
+    static constexpr int servoMaxValue{ 80 };
+    static constexpr int servoMinValue{ 20 };
 
     // Modes
     int steeringMode{ 0 }; // fast = 0, precise = 1
@@ -121,6 +123,7 @@ public slots:
     void toggleReceivingData( int enabled );
     // showing PWM in test mode
     void sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqueValue );
+    void sendSingleServoAngleValue( unsigned servoNumber, unsigned angleValue );
 
     void updateMotor1PWMValues( unsigned value );
     void updateMotor2PWMValues( unsigned value );
@@ -169,6 +172,7 @@ signals:
     void passMotorValues( unsigned motorNumber, unsigned torqueValue );
     void passServoValues( unsigned servoNumber, unsigned value );
     void sendMotorTorqueToController( unsigned motorNumber, unsigned motorTorque );
+    void sendServoAngleToController( unsigned motorNumber, unsigned motorTorque );
     void sendStopAllMotorsToController();
     void sendGetPressureToController();
     // void

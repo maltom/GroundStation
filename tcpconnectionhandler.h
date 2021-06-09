@@ -31,9 +31,10 @@ public slots:
     void connectionFailed();
     void receiveData();
 
-    //    void on_pushSendCustomCommand_clicked();
     void sendMotorCommand( unsigned motorNumber, unsigned motorTorque );
     void sendToAllMotorsCommand( std::vector< unsigned > motorTorques );
+    void sendServoCommand( unsigned servoNumber, unsigned servoAngle );
+    void sendToAllServosCommand( std::vector< unsigned > servoAngles );
 
     void openConnection();
     void closeConnection();
@@ -82,7 +83,6 @@ signals:
     void sendPressure( float pressure );
 
 private:
-    void on_horizontalSliderServo_SendServoValue( int servo_number, int servo_value );
     void sendGripperCommand( bool open );
 
     void floatToBytes( float in, quint8* out );

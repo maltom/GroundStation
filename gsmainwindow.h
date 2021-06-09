@@ -40,12 +40,16 @@ private:
     static constexpr int regulatorTickTime{ 10 };       // ms
     static constexpr int pressureSensorFrequency{ 10 }; // Hz
     static constexpr int imuFrequency{ 10 };            // Hz
+    static constexpr int motorMaxValue{ 2000 };
+    static constexpr int motorMinValue{ 0 };
+    static constexpr int motorNeutralValue{ 1000 };
 
     // Modes
     int steeringMode{ 0 }; // fast = 0, precise = 1
     int cameraChosen{ 0 }; // frontal camera = 0, downward camera = 0
     int testMode{ 0 };     // test Mode for sending custom PWM values
     unsigned int coralProcessing{ 0u };
+    int receivingSensorData{ 0 };
     // positionData
     positionData spaceMousePositionData; // only current is in use
     positionData deviationPositionData;  // only current is in use
@@ -84,6 +88,7 @@ private slots:
     void parseStopGulper();
     void parseBackwardGulper();
     void parseForwardGulper();
+    void parseSendGetPressureToController();
 
 public:
     GSMainWindow( QWidget* parent = nullptr );
@@ -102,7 +107,7 @@ public slots:
     void receiveConnectionStatus( unsigned status ); // status of connection
     void receiveOrientationDrawing( QImage drawing );
 
-    void receivePressureData( int value );
+    void receivePressureData( float value );
 
     void changeCamera( void );
     void toggleCoralProcessing();
@@ -113,8 +118,17 @@ public slots:
     void printCurrentPosition( Eigen::VectorXd position, Eigen::VectorXd thrusterAzimuth );
     void printDeviation( void );
     void testModeEnable( int enabled );
+    void toggleReceivingData( int enabled );
     // showing PWM in test mode
-    void updateMotorPWMValues( void );
+    void sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqueValue );
+
+    void updateMotor1PWMValues( unsigned value );
+    void updateMotor2PWMValues( unsigned value );
+    void updateMotor3PWMValues( unsigned value );
+    void updateMotor4PWMValues( unsigned value );
+    void updateMotor5PWMValues( unsigned value );
+    void updateServo1PWMValues( unsigned value );
+    void updateServo2PWMValues( unsigned value );
 
     // drawing events
     // void drawLines(void);
@@ -151,6 +165,12 @@ signals:
     void sendConnectionStartRequest( void );
 
     void sendDesiredForcesToLQR( double x, double y, double z, double roll, double pitch, double yaw );
+
+    void passMotorValues( unsigned motorNumber, unsigned torqueValue );
+    void passServoValues( unsigned servoNumber, unsigned value );
+    void sendMotorTorqueToController( unsigned motorNumber, unsigned motorTorque );
+    void sendStopAllMotorsToController();
+    void sendGetPressureToController();
     // void
 };
 #endif // GSMAINWINDOW_H

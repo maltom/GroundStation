@@ -10,8 +10,7 @@ tcpConnectionHandler::tcpConnectionHandler( QObject* parent )
 {
     connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( connected() ), this, SLOT( connectionSuccesfull() ) );
     connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( disconnected() ), this, SLOT( connectionFailed() ) );
-    //	    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( readyRead() ), this, SLOT(
-    //	    TcpNewTcpReceiveLogs() ) );
+    connect( rov_tcp_client.TcpClientConnect_GetSocket(), SIGNAL( readyRead() ), this, SLOT( receiveData() ) );
 }
 
 void tcpConnectionHandler::connectionSuccesfull()
@@ -39,37 +38,37 @@ static QString mainwindow_QVarLengthArrayToQString( QVarLengthArray< qint8 > mes
     return message_string;
 }
 
-// void tcpConnectionHandler::TcpNewTcpReceiveLogs()
-//{
-//    QString log;
-//    QByteArray received_data = rov_tcp_client.TcpClientConnect_GetAllReceivedData();
-//    //    QString received_data_log = "Data received: " + received_data.toStdString();
-//    //    this->addToLogs(received_data_log);
+void tcpConnectionHandler::receiveData()
+{
+    QString log;
+    QByteArray received_data = rov_tcp_client.TcpClientConnect_GetAllReceivedData();
+    //    QString received_data_log = "Data received: " + received_data.toStdString();
+    //    this->addToLogs(received_data_log);
 
-//    int module_id = static_cast< int >( received_data[ 0 ] );
+    int module_id = static_cast< int >( received_data[ 0 ] );
 
-//    switch( module_id )
-//    {
-//    case PRESSURE_SENSOR_MODULE_ID:
-//    {
-//        float pressure = press.Pressure_ParseReceivedMessage( received_data );
-//        log            = "Pressure: " + ( QString::number( pressure ) );
-//    }
-//    break;
+    switch( module_id )
+    {
+    case PRESSURE_SENSOR_MODULE_ID:
+    {
+        float pressure = press.Pressure_ParseReceivedMessage( received_data );
+        emit sendPressure( pressure );
+    }
+    break;
 
-//    case AHRS_DATA_ID:
-//    {
-//        // this->addToLogs("Received ahrs data!!!");
-//        // dalsze parsowanie received danych, na podstawie ahrs data id
-//    }
-//    break;
+    case AHRS_DATA_ID:
+    {
+        // this->addToLogs("Received ahrs data!!!");
+        // dalsze parsowanie received danych, na podstawie ahrs data id
+    }
+    break;
 
-//    default:
-//    {
-//    }
-//    break;
-//    }
-//}
+    default:
+    {
+    }
+    break;
+    }
+}
 
 // void tcpConnectionHandler::on_pushSendCustomCommand_clicked()
 //{
@@ -105,44 +104,47 @@ static QString mainwindow_QVarLengthArrayToQString( QVarLengthArray< qint8 > mes
 //    rov_tcp_client.TcpClient_Transmit( qs_custom_command.toUtf8() );
 //}
 
-// void tcpConnectionHandler::on_pushButtonSendMotorCommand_clicked()
-//{
-//    this->addToLogs( "Send motor command..." );
-//    QString log_motor
-//        = "Motor number: " + ui->lineEditMotorNumber->text() + " Motor torque: " + ui->lineEditTorque->text();
-//    this->addToLogs( log_motor );
+void tcpConnectionHandler::sendMotorCommand( unsigned motorNumber, unsigned motorTorque )
+{
+    QVarLengthArray< quint8 > bytes;
+    bytes.clear();
 
-//    int motor_number = ui->lineEditMotorNumber->text().toInt();
-//    int motor_torque = ui->lineEditTorque->text().toInt();
+    if( motorTorque >= 0 && motorTorque <= 2000 )
+    {
+        // construct motor control mesage
+        bytes.append( MOTOR_CONTROL_MODULE_ID );         // motor module M4 handler id
+        bytes.append( 4 );                               // payload szie
+        bytes.append( MOTOR_CONTROL_TORQUE_MESSAGE_ID ); // motor control message id
+        bytes.append( motorNumber );
+        quint16 value   = static_cast< quint16 >( motorTorque );
+        quint8 ms_value = static_cast< quint8 >( value >> 8 );
+        quint8 ls_value = static_cast< quint8 >( value & 0xFF );
+        bytes.append( ms_value );
+        bytes.append( ls_value );
 
-//    QVarLengthArray< quint8 > bytes;
-//    bytes.clear();
+        // convet to QByteArray
+        QByteArray motor_control_message;
+        motor_control_message.clear();
+        for( int i = 0; i < bytes.length(); i++ )
+        {
+            motor_control_message.append( static_cast< char >( bytes[ i ] ) );
+        }
 
-//    if( motor_torque >= 0 && motor_torque <= 2000 )
-//    {
-//        // construct motor control mesage
-//        bytes.append( MOTOR_CONTROL_MODULE_ID );         // motor module M4 handler id
-//        bytes.append( 4 );                               // payload szie
-//        bytes.append( MOTOR_CONTROL_TORQUE_MESSAGE_ID ); // motor control message id
-//        bytes.append( motor_number );
-//        quint16 value   = static_cast< quint16 >( motor_torque );
-//        quint8 ms_value = static_cast< quint8 >( value >> 8 );
-//        quint8 ls_value = static_cast< quint8 >( value & 0xFF );
-//        bytes.append( ms_value );
-//        bytes.append( ls_value );
+        // send message to rov
+        rov_tcp_client.TcpClient_Transmit( motor_control_message );
+    }
+}
 
-//        // convet to QByteArray
-//        QByteArray motor_control_message;
-//        motor_control_message.clear();
-//        for( int i = 0; i < bytes.length(); i++ )
-//        {
-//            motor_control_message.append( static_cast< char >( bytes[ i ] ) );
-//        }
-
-//        // send message to rov
-//        rov_tcp_client.TcpClient_Transmit( motor_control_message );
-//    }
-//}
+void tcpConnectionHandler::sendToAllMotorsCommand( std::vector< unsigned > motorTorques )
+{
+    if( motorTorques.size() != 5 )
+        throw "Number of motors wrong!";
+    else
+    {
+        for( auto i = 0u; i < 5; ++i )
+            sendMotorCommand( i + 1, motorTorques[ i ] );
+    }
+}
 
 void tcpConnectionHandler::openConnection()
 {
@@ -370,32 +372,32 @@ void tcpConnectionHandler::floatToBytes( float in, quint8* out )
 //    rov_tcp_client.TcpClient_Transmit( ahrs_config_message );
 //}
 
-// void tcpConnectionHandler::on_pushButtonStopAllMotors_clicked()
-//{
-//    // send command to stop all motors
+void tcpConnectionHandler::sendStopAllMotorsCommand()
+{
+    // send command to stop all motors
 
-//    QVarLengthArray< quint8 > bytes;
-//    bytes.clear();
+    QVarLengthArray< quint8 > bytes;
+    bytes.clear();
 
-//    // construct motor control mesage
-//    bytes.append( MOTOR_CONTROL_MODULE_ID );           // motor module M4 handler id
-//    bytes.append( 4 );                                 // payload szie
-//    bytes.append( MOTOR_CONTROL_STOP_ALL_MESSAGE_ID ); // motor control message id
-//    bytes.append( 0 );                                 // unused, but payload size must be equal to 4
-//    bytes.append( 0 );
-//    bytes.append( 0 );
+    // construct motor control mesage
+    bytes.append( MOTOR_CONTROL_MODULE_ID );           // motor module M4 handler id
+    bytes.append( 4 );                                 // payload szie
+    bytes.append( MOTOR_CONTROL_STOP_ALL_MESSAGE_ID ); // motor control message id
+    bytes.append( 0 );                                 // unused, but payload size must be equal to 4
+    bytes.append( 0 );
+    bytes.append( 0 );
 
-//    // convet to QByteArray
-//    QByteArray motor_control_message;
-//    motor_control_message.clear();
-//    for( int i = 0; i < bytes.length(); i++ )
-//    {
-//        motor_control_message.append( static_cast< char >( bytes[ i ] ) );
-//    }
+    // convet to QByteArray
+    QByteArray motor_control_message;
+    motor_control_message.clear();
+    for( int i = 0; i < bytes.length(); i++ )
+    {
+        motor_control_message.append( static_cast< char >( bytes[ i ] ) );
+    }
 
-//    // send message to rov
-//    rov_tcp_client.TcpClient_Transmit( motor_control_message );
-//}
+    // send message to rov
+    rov_tcp_client.TcpClient_Transmit( motor_control_message );
+}
 
 void tcpConnectionHandler::sendStopGulper()
 {

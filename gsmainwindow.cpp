@@ -15,6 +15,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QImage>
+#include <QSlider>
+#include <QCheckBox>
 
 GSMainWindow::GSMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::GSMainWindow )
 {
@@ -148,9 +150,23 @@ void GSMainWindow::tcpHandlerStart( void )
     connect( this, &GSMainWindow::backwardGulper, connectionHandler, &tcpConnectionHandler::sendBackwardGulper );
     connect( this, &GSMainWindow::stopGulper, connectionHandler, &tcpConnectionHandler::sendStopGulper );
 
+    connect(
+        this, &GSMainWindow::sendMotorTorqueToController, connectionHandler, &tcpConnectionHandler::sendMotorCommand );
+
+    connect( this,
+             &GSMainWindow::sendStopAllMotorsToController,
+             connectionHandler,
+             &tcpConnectionHandler::sendStopAllMotorsCommand );
+
     connect( this, &GSMainWindow::setPressureRate, connectionHandler, &tcpConnectionHandler::sendPressureRate );
     connect( this, &GSMainWindow::setEulerRate, connectionHandler, &tcpConnectionHandler::sendEulerRate );
     connect( this, &GSMainWindow::setImuRate, connectionHandler, &tcpConnectionHandler::sendImuRate );
+
+    connect( this,
+             &GSMainWindow::sendGetPressureToController,
+             connectionHandler,
+             &tcpConnectionHandler::sendGetPressureRequest );
+    connect( connectionHandler, &tcpConnectionHandler::sendPressure, this, &GSMainWindow::receivePressureData );
 }
 
 void GSMainWindow::modeButtonsInitialization( void )
@@ -159,13 +175,16 @@ void GSMainWindow::modeButtonsInitialization( void )
     connect( ui->toggleSteeringModeButton, SIGNAL( released() ), SLOT( changeSteeringMode() ) );
 
     connect( ui->motorTestEnabled, SIGNAL( stateChanged( int ) ), this, SLOT( testModeEnable( int ) ) );
-    connect( ui->motor1Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->motor2Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->motor3Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->motor4Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->motor5Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->servo1Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
-    connect( ui->servo2Slider, SIGNAL( valueChanged( int ) ), SLOT( updateMotorPWMValues() ) );
+    connect( ui->receivingDataCheckBox, &QCheckBox::stateChanged, this, &GSMainWindow::toggleReceivingData );
+    connect( ui->motor1Slider, &QSlider::valueChanged, this, &GSMainWindow::updateMotor1PWMValues );
+    connect( ui->motor2Slider, &QSlider::valueChanged, this, &GSMainWindow::updateMotor2PWMValues );
+    connect( ui->motor3Slider, &QSlider::valueChanged, this, &GSMainWindow::updateMotor3PWMValues );
+    connect( ui->motor4Slider, &QSlider::valueChanged, this, &GSMainWindow::updateMotor4PWMValues );
+    connect( ui->motor5Slider, &QSlider::valueChanged, this, &GSMainWindow::updateMotor5PWMValues );
+    connect( ui->servo1Slider, &QSlider::valueChanged, this, &GSMainWindow::updateServo1PWMValues );
+    connect( ui->servo2Slider, &QSlider::valueChanged, this, &GSMainWindow::updateServo2PWMValues );
+
+    connect( this, &GSMainWindow::passMotorValues, this, &GSMainWindow::sendSingleMotorPWMValue );
 
     connect( ui->connectButton, SIGNAL( released() ), this, SLOT( toggleConnection() ) );
 
@@ -386,16 +405,72 @@ void GSMainWindow::testModeEnable( int enabled )
     ui->servo1Slider->setEnabled( enabled );
     ui->servo2Slider->setEnabled( enabled );
     testMode = enabled;
+    if( enabled == 0 )
+    {
+        emit sendStopAllMotorsToController();
+    }
 }
-void GSMainWindow::updateMotorPWMValues( void )
+void GSMainWindow::toggleReceivingData( int enabled )
 {
-    ui->motor1Value->setText( QString::number( ui->motor1Slider->value() ) );
-    ui->motor2Value->setText( QString::number( ui->motor2Slider->value() ) );
-    ui->motor3Value->setText( QString::number( ui->motor3Slider->value() ) );
-    ui->motor4Value->setText( QString::number( ui->motor4Slider->value() ) );
-    ui->motor5Value->setText( QString::number( ui->motor5Slider->value() ) );
-    ui->servo1Value->setText( QString::number( ui->servo1Slider->value() ) );
-    ui->servo2Value->setText( QString::number( ui->servo2Slider->value() ) );
+    if( receivingSensorData == 0 && enabled != 0 )
+    {
+        receivingSensorData = 1;
+        emit setPressureRate( pressureSensorFrequency );
+    }
+}
+
+void GSMainWindow::updateMotor1PWMValues( unsigned value )
+{
+    emit passMotorValues( 1u, value );
+}
+void GSMainWindow::updateMotor2PWMValues( unsigned value )
+{
+    emit passMotorValues( 2u, value );
+}
+void GSMainWindow::updateMotor3PWMValues( unsigned value )
+{
+    emit passMotorValues( 3u, value );
+}
+void GSMainWindow::updateMotor4PWMValues( unsigned value )
+{
+    emit passMotorValues( 4u, value );
+}
+void GSMainWindow::updateMotor5PWMValues( unsigned value )
+{
+    emit passMotorValues( 5u, value );
+}
+void GSMainWindow::updateServo1PWMValues( unsigned value )
+{
+    emit passServoValues( 1u, value );
+}
+void GSMainWindow::updateServo2PWMValues( unsigned value )
+{
+    emit passServoValues( 2u, value );
+}
+
+void GSMainWindow::sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqueValue )
+{
+    switch( motorNumber )
+    {
+    case 1u:
+        ui->motor1Value->setText( QString::number( torqueValue ) );
+        break;
+    case 2u:
+        ui->motor2Value->setText( QString::number( torqueValue ) );
+        break;
+    case 3u:
+        ui->motor3Value->setText( QString::number( torqueValue ) );
+        break;
+    case 4u:
+        ui->motor4Value->setText( QString::number( torqueValue ) );
+        break;
+    case 5u:
+        ui->motor5Value->setText( QString::number( torqueValue ) );
+        break;
+    default:
+        break;
+    }
+    emit sendMotorTorqueToController( motorNumber, torqueValue );
 }
 void GSMainWindow::mouseMoveEvent( QMouseEvent* event )
 {
@@ -459,7 +534,9 @@ void GSMainWindow::parseForwardGulper()
     emit forwardGulper();
 }
 
-void GSMainWindow::receivePressureData( int value )
+void GSMainWindow::receivePressureData( float value )
 {
     ui->pressureValueValue->setText( QString::number( value ) );
 }
+
+void GSMainWindow::parseSendGetPressureToController() {}

@@ -1,6 +1,8 @@
 #ifndef TCPCONNECTIONHANDLER_H
 #define TCPCONNECTIONHANDLER_H
 
+#include <vector>
+
 #include <QObject>
 #include "src/Rov_Tcp_Client_Qt/Ahrs/ahrsconfigure.h"
 #include "src/Rov_Tcp_Client_Qt/Ahrs/ahrsreaddata.h"
@@ -27,10 +29,11 @@ public slots:
 
     void connectionSuccesfull();
     void connectionFailed();
-    //    void TcpNewTcpReceiveLogs();
+    void receiveData();
 
     //    void on_pushSendCustomCommand_clicked();
-    //    void on_pushButtonSendMotorCommand_clicked();
+    void sendMotorCommand( unsigned motorNumber, unsigned motorTorque );
+    void sendToAllMotorsCommand( std::vector< unsigned > motorTorques );
 
     void openConnection();
     void closeConnection();
@@ -73,9 +76,10 @@ public slots:
     //    void on_pbApplyMagBias_clicked();
     //    void on_pbApplyGyroTrim_clicked();
 
-    //    void on_pushButtonStopAllMotors_clicked();
+    void sendStopAllMotorsCommand();
 signals:
     void sendConnectionStatus( unsigned status );
+    void sendPressure( float pressure );
 
 private:
     void on_horizontalSliderServo_SendServoValue( int servo_number, int servo_value );

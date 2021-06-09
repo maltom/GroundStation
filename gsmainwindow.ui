@@ -230,6 +230,32 @@
         <string>Sensors</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_13">
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="imuBox">
+          <property name="title">
+           <string>IMU</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_14">
+           <item row="0" column="0">
+            <widget class="QLabel" name="imuRateLabel">
+             <property name="text">
+              <string>Freq</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="imuRateValue">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QGroupBox" name="pressureBox">
           <property name="title">
@@ -239,7 +265,7 @@
            <item row="0" column="1">
             <widget class="QLabel" name="pressureRateValue">
              <property name="text">
-              <string>0</string>
+              <string>10</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -279,30 +305,11 @@
           </layout>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QGroupBox" name="imuBox">
-          <property name="title">
-           <string>IMU</string>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="receivingDataCheckBox">
+          <property name="text">
+           <string>Receive Data</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_14">
-           <item row="0" column="0">
-            <widget class="QLabel" name="imuRateLabel">
-             <property name="text">
-              <string>Freq</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="imuRateValue">
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
         </item>
        </layout>
@@ -1227,10 +1234,13 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1266,7 +1276,7 @@ background-color: rgb(203, 12, 41);
            </size>
           </property>
           <property name="text">
-           <string>0</string>
+           <string>1000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1302,7 +1312,7 @@ background-color: rgb(203, 12, 41);
            </size>
           </property>
           <property name="text">
-           <string>0</string>
+           <string>1000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1324,7 +1334,7 @@ background-color: rgb(203, 12, 41);
            </size>
           </property>
           <property name="text">
-           <string>0</string>
+           <string>1000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1337,10 +1347,16 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>2000</number>
+          </property>
+          <property name="pageStep">
+           <number>10</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1360,10 +1376,13 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>20</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>80</number>
+          </property>
+          <property name="value">
+           <number>50</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1376,10 +1395,16 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>20</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>80</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>50</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1430,7 +1455,7 @@ background-color: rgb(203, 12, 41);
            </size>
           </property>
           <property name="text">
-           <string>0</string>
+           <string>1000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1450,10 +1475,13 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1476,10 +1504,13 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1492,10 +1523,13 @@ background-color: rgb(203, 12, 41);
            <bool>false</bool>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1539,7 +1573,7 @@ background-color: rgb(203, 12, 41);
            </size>
           </property>
           <property name="text">
-           <string>0</string>
+           <string>1000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

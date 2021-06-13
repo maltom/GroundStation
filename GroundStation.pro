@@ -22,6 +22,7 @@ SOURCES += \
     lqrhandler.cpp \
     main.cpp \
     gsmainwindow.cpp \
+    mosaicprocessor.cpp \
     positiondata.cpp \
     ROV.cpp \
     spacemousecontroller.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     gsmainwindow.h \
     jsonxx/jsonxx.h \
     lqrhandler.h \
+    mosaicprocessor.h \
     positiondata.h \
     ROV.h \
     spacemousecontroller.h \

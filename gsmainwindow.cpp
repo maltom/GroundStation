@@ -37,6 +37,7 @@ GSMainWindow::GSMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
 
     regulatorStart();
     tcpHandlerStart();
+    connectRegulatorAndTcpHandler();
     // centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking( true );
 
@@ -225,13 +226,24 @@ void GSMainWindow::regulatorStart()
     regulatorTimer->setInterval( this->regulatorTickTime );
 
     connect( regulatorTimer, &QTimer::timeout, regulator, &LQRHandler::update );
-    connect( regulator, &LQRHandler::positionReady, this, &GSMainWindow::printCurrentPosition );
     connect( this, &GSMainWindow::sendDesiredForcesToLQR, regulator, &LQRHandler::receiveDesiredForces );
     regulatorTimer->start();
     regulator->moveToThread( regulatorThread );
     regulatorTimer->moveToThread( regulatorThread );
 
     regulatorThread->start();
+}
+
+void GSMainWindow::connectRegulatorAndTcpHandler( void )
+{
+    connect( regulator,
+             &LQRHandler::sendCalculatedThrust,
+             connectionHandler,
+             &tcpConnectionHandler::sendToAllMotorsCommand );
+    connect( regulator,
+             &LQRHandler::sendCalculatedAzimuth,
+             connectionHandler,
+             &tcpConnectionHandler::sendToAllServosCommand );
 }
 
 void GSMainWindow::receiveCameraFrame( QImage frame )

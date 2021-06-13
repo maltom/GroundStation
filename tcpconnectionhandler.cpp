@@ -135,25 +135,25 @@ void tcpConnectionHandler::sendMotorCommand( unsigned motorNumber, unsigned moto
     }
 }
 
-void tcpConnectionHandler::sendToAllMotorsCommand( std::vector< unsigned > motorTorques )
+void tcpConnectionHandler::sendToAllMotorsCommand( VectorXd motorTorques )
 {
     if( motorTorques.size() != 5 )
         throw "Number of motors wrong!";
     else
     {
         for( auto i = 0u; i < 5; ++i )
-            sendMotorCommand( i + 1, motorTorques[ i ] );
+            sendMotorCommand( i + 1, static_cast< unsigned >( motorTorques[ i ] ) );
     }
 }
 
-void tcpConnectionHandler::sendToAllServosCommand( std::vector< unsigned > servoAngles )
+void tcpConnectionHandler::sendToAllServosCommand( VectorXd servoAngles )
 {
     if( servoAngles.size() != 2 )
         throw "Number of servos wrong!";
     else
     {
         for( auto i = 0u; i < 2; ++i )
-            sendServoCommand( i + 1, servoAngles[ i ] );
+            sendServoCommand( i + 1, static_cast< unsigned >( servoAngles[ i ] ) );
     }
 }
 

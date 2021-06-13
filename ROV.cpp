@@ -332,7 +332,7 @@ void ROV::thrust_allocation( VectorXd tau )
     u( 4 ) = u2( 2 );
 
     // Adding some inertia to the thrusters
-    for( int i = 0; i <= 4; i++ )
+    for( int i = 0; i < 5; i++ )
     {
         if( ( u( i ) - uPrev( i ) ) > deltaU )
         {
@@ -344,8 +344,7 @@ void ROV::thrust_allocation( VectorXd tau )
         }
     }
 
-    // Making sure that we cannot demand 110% of power
-    for( int i = 0; i <= 4; i++ )
+    for( int i = 0; i < 5; i++ )
     {
         if( u( i ) > 1.0 )
         {
@@ -357,8 +356,15 @@ void ROV::thrust_allocation( VectorXd tau )
         }
     }
 
-    // std::cout << "Alpha 01: " << alpha01 << " alpha 02: " << alpha02 << std::endl;
-    // std::cout << "u = " << u << std::endl;
+    if( alpha01 > angleConstraint )
+        alpha01 = angleConstraint;
+    else if( alpha01 < -angleConstraint )
+        alpha01 = -angleConstraint;
+
+    if( alpha02 > angleConstraint )
+        alpha02 = angleConstraint;
+    else if( alpha02 < -angleConstraint )
+        alpha02 = -angleConstraint;
 }
 
 VectorXd ROV::getThrustSignal() const

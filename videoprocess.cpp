@@ -44,7 +44,7 @@ void videoProcess::receiveCameraSetup( int device )
         cameraPic->open( 0 );
     if( device == 1 )
         // cameraPic->open("http://192.168.0.13/video.mjpg");
-        cameraPic->open( "rtsp://admin:admin@192.168.1.88/1234" );
+        cameraPic->open( "rtsp://admin:admin@169.254.69.70/1234" );
 
     if( !cameraPic->isOpened() )
     {

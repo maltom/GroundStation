@@ -9,6 +9,11 @@
 #include "src/Rov_Tcp_Client_Qt/lykacz/lykacz.h"
 #include "src/Rov_Tcp_Client_Qt/Pressure/pressure.h"
 #include "src/Rov_Tcp_Client_Qt/Tcp_Connection/tcpclientsocket.h"
+#include "typedefs.h"
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 class tcpConnectionHandler : public QObject
 {
@@ -32,9 +37,9 @@ public slots:
     void receiveData();
 
     void sendMotorCommand( unsigned motorNumber, unsigned motorTorque );
-    void sendToAllMotorsCommand( std::vector< unsigned > motorTorques );
+    void sendToAllMotorsCommand( VectorXd motorTorques );
     void sendServoCommand( unsigned servoNumber, unsigned servoAngle );
-    void sendToAllServosCommand( std::vector< unsigned > servoAngles );
+    void sendToAllServosCommand( VectorXd servoAngles );
 
     void openConnection();
     void closeConnection();

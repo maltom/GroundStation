@@ -12,6 +12,7 @@ using namespace Eigen;
 class ROV
 {
 private:
+    static constexpr float angleConstraint = 2.09;
     // Mass and inertia moments
     double m  = 0.0;
     double Ix = 0.0, Iy = 0.0, Iz = 0.0;

@@ -66,6 +66,7 @@ private:
     void modeButtonsInitialization( void );
     void drawingStart( void );
     void regulatorStart( void );
+    void connectRegulatorAndTcpHandler( void );
     // Casual functions
     void setTargetPosition( void );
     void calculateDeviation( void );

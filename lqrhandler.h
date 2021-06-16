@@ -17,7 +17,7 @@ class LQRHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit LQRHandler( int LQRThreadTimerMiliseconds = 10,
+    explicit LQRHandler( int LQRThreadTimerMiliseconds = 1000,
                          positionData* rawPosition     = nullptr,
                          QObject* parent               = nullptr );
 
@@ -26,6 +26,7 @@ private:
     // time elapsed from one regulator call to another, for calculating velocity
     double deltaT;
     double centimeterPrescaler = 1.0;
+    double maxForcesRadius     = 40.0;
     long long ticksElapsed     = 0;
     positionData* rovPosition;
 
@@ -39,6 +40,7 @@ private:
     void updateRawPositions();
 
     void calculateError();
+    void normalizeError();
 
 public slots:
     void update();

@@ -37,9 +37,9 @@ public slots:
     void receiveData();
 
     void sendMotorCommand( unsigned motorNumber, unsigned motorTorque );
-    void sendToAllMotorsCommand( VectorXd motorTorques );
+    void sendToAllMotorsCommand( const VectorXd& motorTorques );
     void sendServoCommand( unsigned servoNumber, unsigned servoAngle );
-    void sendToAllServosCommand( VectorXd servoAngles );
+    void sendToAllServosCommand( const VectorXd& servoAngles );
 
     void openConnection();
     void closeConnection();

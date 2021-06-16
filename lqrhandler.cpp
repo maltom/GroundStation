@@ -2,6 +2,7 @@
 
 #include "lqrhandler.h"
 #include <iostream>
+#include <cmath>
 
 using namespace Eigen;
 
@@ -18,20 +19,32 @@ void LQRHandler::receiveDesiredForces( double x, double y, double z, double roll
 
 void LQRHandler::calculateError()
 {
-    this->error = this->error / 2.5;
+    // this->error = this->error;
 
     for( int i = 0; i < 6; ++i )
     {
-        if( error( i ) > 40.0 )
-            error( i ) = 40.0;
-        else if( error( i ) < -40.0 )
-            error( i ) = -40.0;
+        if( error( i ) > 80.0 )
+            error( i ) = 80.0;
+        else if( error( i ) < -80.0 )
+            error( i ) = -80.0;
+    }
+}
+
+void LQRHandler::normalizeError()
+{
+    double currentForcesRadius = std::sqrt( std::pow( error.x(), 2 ) + std::pow( error.y(), 2 ) );
+    if( currentForcesRadius > maxForcesRadius )
+    {
+        auto factor = maxForcesRadius / currentForcesRadius;
+        error.x()   = error.x() * factor;
+        error.y()   = error.y() * factor;
     }
 }
 
 void LQRHandler::update()
 {
     calculateError();
+    // normalizeError();
     this->rov.thrust_allocation( error ); //[Fx, Fy, Fz, Mr, Mp, My]
 
     ++ticksElapsed;

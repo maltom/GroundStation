@@ -37,7 +37,7 @@ private:
 
     // Technical Values
     const int numberOfCams{ 2 };
-    static constexpr int regulatorTickTime{ 10 };       // ms
+    static constexpr int regulatorTickTime{ 1000 };     // ms
     static constexpr int pressureSensorFrequency{ 10 }; // Hz
     static constexpr int imuFrequency{ 10 };            // Hz
     static constexpr int motorMaxValue{ 2000 };

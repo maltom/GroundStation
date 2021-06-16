@@ -436,15 +436,15 @@ void GSMainWindow::toggleReceivingData( int enabled )
 
 void GSMainWindow::updateMotor1PWMValues( unsigned value )
 {
-    emit passMotorValues( 1u, value );
+    emit passMotorValues( 1u, 2000u - value );
 }
 void GSMainWindow::updateMotor2PWMValues( unsigned value )
 {
-    emit passMotorValues( 2u, value );
+    emit passMotorValues( 2u, 2000u - value );
 }
 void GSMainWindow::updateMotor3PWMValues( unsigned value )
 {
-    emit passMotorValues( 3u, value );
+    emit passMotorValues( 3u, 2000u - value );
 }
 void GSMainWindow::updateMotor4PWMValues( unsigned value )
 {
@@ -452,15 +452,15 @@ void GSMainWindow::updateMotor4PWMValues( unsigned value )
 }
 void GSMainWindow::updateMotor5PWMValues( unsigned value )
 {
-    emit passMotorValues( 5u, value );
+    emit passMotorValues( 5u, 2000u - value );
 }
 void GSMainWindow::updateServo1PWMValues( unsigned value )
 {
-    emit passServoValues( 1u, value );
+    emit passServoValues( 2u, value );
 }
 void GSMainWindow::updateServo2PWMValues( unsigned value )
 {
-    emit passServoValues( 2u, value );
+    emit passServoValues( 1u, value );
 }
 
 void GSMainWindow::sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqueValue )
@@ -468,19 +468,19 @@ void GSMainWindow::sendSingleMotorPWMValue( unsigned motorNumber, unsigned torqu
     switch( motorNumber )
     {
     case 1u:
-        ui->motor1Value->setText( QString::number( torqueValue ) );
+        ui->motor1Value->setText( QString::number( 2000u - torqueValue ) );
         break;
     case 2u:
-        ui->motor2Value->setText( QString::number( torqueValue ) );
+        ui->motor2Value->setText( QString::number( 2000u - torqueValue ) );
         break;
     case 3u:
-        ui->motor3Value->setText( QString::number( torqueValue ) );
+        ui->motor3Value->setText( QString::number( 2000u - torqueValue ) );
         break;
     case 4u:
         ui->motor4Value->setText( QString::number( torqueValue ) );
         break;
     case 5u:
-        ui->motor5Value->setText( QString::number( torqueValue ) );
+        ui->motor5Value->setText( QString::number( 2000u - torqueValue ) );
         break;
     default:
         break;

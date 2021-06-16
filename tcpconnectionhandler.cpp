@@ -5,6 +5,7 @@
 #include <QByteArray>
 #include <QVarLengthArray>
 #include <QTextCodec>
+#include <iostream>
 
 tcpConnectionHandler::tcpConnectionHandler( QObject* parent )
 {
@@ -121,7 +122,7 @@ void tcpConnectionHandler::sendMotorCommand( unsigned motorNumber, unsigned moto
         quint8 ls_value = static_cast< quint8 >( value & 0xFF );
         bytes.append( ms_value );
         bytes.append( ls_value );
-
+        std::cout << motorNumber << "    " << motorTorque << std::endl;
         // convet to QByteArray
         QByteArray motor_control_message;
         motor_control_message.clear();
@@ -135,18 +136,25 @@ void tcpConnectionHandler::sendMotorCommand( unsigned motorNumber, unsigned moto
     }
 }
 
-void tcpConnectionHandler::sendToAllMotorsCommand( VectorXd motorTorques )
+void tcpConnectionHandler::sendToAllMotorsCommand( const VectorXd& motorTorques )
 {
     if( motorTorques.size() != 5 )
         throw "Number of motors wrong!";
     else
     {
         for( auto i = 0u; i < 5; ++i )
+        {
             sendMotorCommand( i + 1, static_cast< unsigned >( motorTorques[ i ] ) );
+            volatile int j = 0;
+            for( ; j < 1000000000; )
+            {
+                j++;
+            }
+        }
     }
 }
 
-void tcpConnectionHandler::sendToAllServosCommand( VectorXd servoAngles )
+void tcpConnectionHandler::sendToAllServosCommand( const VectorXd& servoAngles )
 {
     if( servoAngles.size() != 2 )
         throw "Number of servos wrong!";

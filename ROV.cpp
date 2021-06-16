@@ -105,7 +105,7 @@ void ROV::init_thrust()
 
     T << t1, t2, t3, t4, t5;
 
-    deltaU = 0.0125; // 0.00625 for 0.005deltaT
+    deltaU = 125; // 0.00625 for 0.005deltaT
 }
 
 // Function for creating Coriolis forces matrix
@@ -213,10 +213,10 @@ void ROV::thrust_allocation( VectorXd tau )
     tau_desired << tau( 0 ), tau( 1 ), tau( 5 );
 
     // Constraints
-    double delta_a = 0.03; // Speed of servo - the angle which it turns by in 1 timestep 0.015 for 0.005deltaT
+    double delta_a = 3; // Speed of servo - the angle which it turns by in 1 timestep 0.015 for 0.005deltaT
 
-    double u_min = -0.4; // delta u which means how fast the force can grow in 1 timestep
-    double u_max = 0.4;
+    double u_min = -400.0; // delta u which means how fast the force can grow in 1 timestep
+    double u_max = 400.0;
 
     // Cost matrices for quad prog
     VectorXd Q  = VectorXd::Zero( 3 ); // Penalizing the difference between desired tau and generated one
